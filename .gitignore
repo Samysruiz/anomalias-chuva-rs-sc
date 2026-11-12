@@ -1,0 +1,14 @@
+# dados brutos e derivados: não vão para o repositório
+*.parquet
+*.zip
+06_dados/
+_lotes_03/
+# exportações do REInDesC: condições de uso não verificadas.
+# As contagens derivadas em achados/dados/ são liberadas.
+reindesc*.csv
+!achados/dados/reindesc_agregados.csv
+# ambiente
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/

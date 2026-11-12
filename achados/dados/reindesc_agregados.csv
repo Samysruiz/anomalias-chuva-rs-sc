@@ -1,0 +1,11 @@
+indicador,rs,sc,total
+ocorrencias,325,381,706
+ocorrencias_grande_porte,45,2,47
+ocorrencias_medio_porte,83,68,151
+ocorrencias_pequeno_porte,197,311,508
+dias_com_ocorrencia,104,124,228
+episodios_gap_2d,52,69,121
+episodios_severos_gp_ou_mp,18,19,37
+episodios_com_gp,4,2,6
+episodios_severos_extensos_5mun,10,14,24
+episodios_severos_locais,8,5,13

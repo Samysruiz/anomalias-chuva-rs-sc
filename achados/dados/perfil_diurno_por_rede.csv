@@ -1,0 +1,97 @@
+rede,hora_carimbo,percentual_da_chuva_total
+CEMADEN,0,4.7
+CEMADEN,1,4.5
+CEMADEN,2,4.3
+CEMADEN,3,4.1
+CEMADEN,4,3.8
+CEMADEN,5,3.5
+CEMADEN,6,3.5
+CEMADEN,7,3.4
+CEMADEN,8,3.4
+CEMADEN,9,3.5
+CEMADEN,10,3.4
+CEMADEN,11,3.6
+CEMADEN,12,3.5
+CEMADEN,13,3.4
+CEMADEN,14,3.3
+CEMADEN,15,3.5
+CEMADEN,16,3.9
+CEMADEN,17,4.3
+CEMADEN,18,4.9
+CEMADEN,19,5.6
+CEMADEN,20,5.6
+CEMADEN,21,5.8
+CEMADEN,22,5.6
+CEMADEN,23,5.1
+ICEA,0,1.8
+ICEA,1,1.1
+ICEA,2,1.0
+ICEA,3,1.0
+ICEA,4,0.9
+ICEA,5,4.0
+ICEA,6,6.6
+ICEA,7,3.8
+ICEA,8,12.3
+ICEA,9,4.1
+ICEA,10,3.7
+ICEA,11,5.2
+ICEA,12,4.7
+ICEA,13,3.9
+ICEA,14,3.7
+ICEA,15,3.5
+ICEA,16,10.9
+ICEA,17,5.1
+ICEA,18,5.3
+ICEA,19,4.9
+ICEA,20,3.6
+ICEA,21,3.0
+ICEA,22,3.3
+ICEA,23,2.6
+INMET subdiario,0,4.5
+INMET subdiario,1,4.0
+INMET subdiario,2,4.1
+INMET subdiario,3,3.8
+INMET subdiario,4,3.5
+INMET subdiario,5,3.2
+INMET subdiario,6,3.3
+INMET subdiario,7,3.5
+INMET subdiario,8,3.6
+INMET subdiario,9,3.7
+INMET subdiario,10,3.9
+INMET subdiario,11,4.0
+INMET subdiario,12,4.0
+INMET subdiario,13,4.1
+INMET subdiario,14,4.1
+INMET subdiario,15,4.0
+INMET subdiario,16,4.1
+INMET subdiario,17,4.3
+INMET subdiario,18,4.7
+INMET subdiario,19,5.1
+INMET subdiario,20,5.4
+INMET subdiario,21,5.3
+INMET subdiario,22,4.9
+INMET subdiario,23,4.9
+Telemetria,0,4.4
+Telemetria,1,3.8
+Telemetria,2,3.2
+Telemetria,3,3.0
+Telemetria,4,2.8
+Telemetria,5,2.9
+Telemetria,6,2.8
+Telemetria,7,2.7
+Telemetria,8,2.9
+Telemetria,9,3.3
+Telemetria,10,3.5
+Telemetria,11,3.4
+Telemetria,12,3.9
+Telemetria,13,3.6
+Telemetria,14,3.6
+Telemetria,15,3.9
+Telemetria,16,4.4
+Telemetria,17,5.4
+Telemetria,18,5.8
+Telemetria,19,6.3
+Telemetria,20,7.0
+Telemetria,21,6.3
+Telemetria,22,6.0
+Telemetria,23,5.2
