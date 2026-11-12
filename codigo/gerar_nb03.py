@@ -266,7 +266,18 @@ with open(ARQ_DECISOES, "rb") as f:
 DEC = json.loads(_bytes)
 HASH_DECISOES = hashlib.sha256(_bytes).hexdigest()[:16]
 
-assert DEC["versao"] == "1.0", "versão do decisoes.json mudou; confira o Quadro de decisões antes de seguir"
+# Versões aceitas e os seus hashes. Se o arquivo mudar sem passar por aqui, o notebook para.
+# 1.0 = pré-registro original, congelado em decisoes_v1.0_original.json.
+# 1.1 = emendas de 12/11/2026, todas anteriores a qualquer treinamento (bloco "emendas" do arquivo).
+VERSOES_ACEITAS = {"1.0": "9e95c5fe56841bf7", "1.1": "ecb0a097f983665c"}
+assert DEC["versao"] in VERSOES_ACEITAS, (
+    f"versão {DEC['versao']} do decisoes.json não reconhecida; registre a emenda antes de seguir")
+if HASH_DECISOES != VERSOES_ACEITAS[DEC["versao"]]:
+    print(f"ATENÇÃO: o hash do decisoes.json ({HASH_DECISOES}) não bate com o registrado para a "
+          f"versão {DEC['versao']} ({VERSOES_ACEITAS[DEC['versao']]}). O arquivo foi editado sem "
+          f"registrar a emenda. Confira antes de usar qualquer resultado.")
+for _e in DEC.get("emendas", []):
+    print(f"  emenda {_e['data']}: {_e['item']}")
 UFS = DEC["dados"]["ufs"]
 ANO_I, ANO_F = DEC["dados"]["ano_inicial"], DEC["dados"]["ano_final"]
 PASSO = DEC["resolucao"]["passo"]
@@ -783,9 +794,27 @@ anos_ok = (dias_por_ano[dias_por_ano["dias"] >= DIAS_VALIDOS_MIN_POR_ANO]
 EST = info_uso[["gauge_code", "network", "state", "city", "lat", "long", "time_step", "passo_min"]].copy()
 EST = EST.merge(anos_ok, on="gauge_code", how="left")
 EST["anos_treino_ok"] = EST["anos_treino_ok"].fillna(0).astype(int)
-EST["elegivel"] = EST["anos_treino_ok"] >= ANOS_MIN_TREINO
-print(f"estações elegíveis (>= {ANOS_MIN_TREINO} anos no treino): {int(EST['elegivel'].sum())} de {len(EST)}")
-print(EST.groupby("network")["elegivel"].agg(["sum", "size"]).rename(columns={"sum": "elegiveis", "size": "total"}).to_string())
+EST["atende_anos_minimos"] = EST["anos_treino_ok"] >= ANOS_MIN_TREINO
+
+# Emenda de 12/11/2026 (decisoes.json v1.1): redes excluídas por decisão declarada.
+# A exclusão é aplicada AQUI, e não antes do QC, de propósito: a auditoria das células 15 e 16
+# precisa continuar mostrando os números que justificam a exclusão.
+REDES_EXCLUIDAS = DEC["dados"].get("redes_excluidas", [])
+EST["rede_excluida"] = EST["network"].isin(REDES_EXCLUIDAS)
+EST["elegivel"] = EST["atende_anos_minimos"] & ~EST["rede_excluida"]
+
+# Quinto critério de refutação: replicação restrita ao Hidroweb diário, única rede com
+# composição estável nos 31 anos. A marcação sai aqui para o notebook de avaliação usar.
+EST["subconjunto_hidroweb"] = EST["elegivel"] & (EST["network"] == "Hidroweb diário")
+
+print("redes excluídas por emenda:", REDES_EXCLUIDAS or "(nenhuma)")
+if REDES_EXCLUIDAS:
+    perdidas = int((EST["atende_anos_minimos"] & EST["rede_excluida"]).sum())
+    print(f"  estações que atendiam aos anos mínimos e saíram pela exclusão de rede: {perdidas}")
+print(f"estações elegíveis (>= {ANOS_MIN_TREINO} anos no treino, redes excluídas fora): "
+      f"{int(EST['elegivel'].sum())} de {len(EST)}")
+print(f"subconjunto Hidroweb diário (5º critério de refutação): {int(EST['subconjunto_hidroweb'].sum())}")
+print(EST.groupby("network")[["atende_anos_minimos", "elegivel"]].agg(["sum", "size"]).to_string())
 ''')
 
 md("""
@@ -837,14 +866,30 @@ code(r'''
 import matplotlib
 import matplotlib.pyplot as plt
 ativ = V.merge(info_uso[["gauge_code", "network"]], on="gauge_code")
+ativ = ativ[ativ["datetime"].dt.year <= ANO_F]   # corta o dia de fronteira que cai no ano seguinte
 ativ["ano"] = ativ["datetime"].dt.year
 tab = ativ.groupby(["ano", "network"])["gauge_code"].nunique().unstack(fill_value=0)
-ax = tab.plot(kind="bar", stacked=True, figsize=(11, 4.5), width=0.85)
-ax.set_xlabel("Ano"); ax.set_ylabel("Estações com pelo menos um dia válido")
-ax.set_title("Estações ativas por ano e rede, após o controle de qualidade")
+tab.to_csv(os.path.join(PASTA_SAIDA, "03_estacoes_ativas_por_ano.csv"))
+
+# A figura do relatório é a das elegíveis: mostrar as 2.132 num trabalho que usa 790 confunde o leitor.
+elegiveis = set(EST.loc[EST["elegivel"], "gauge_code"])
+tab_el = (ativ[ativ["gauge_code"].isin(elegiveis)]
+          .groupby(["ano", "network"])["gauge_code"].nunique().unstack(fill_value=0))
+tab_el.to_csv(os.path.join(PASTA_SAIDA, "03_estacoes_elegiveis_por_ano.csv"))
+
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(11, 8), sharex=True)
+tab.plot(kind="bar", stacked=True, width=0.85, ax=a1, legend=True)
+a1.set_title("Todas as estações com dia válido, por ano e rede")
+a1.set_ylabel("Estações"); a1.set_xlabel("")
+tab_el.plot(kind="bar", stacked=True, width=0.85, ax=a2, legend=True)
+a2.set_title(f"Somente as {len(elegiveis)} estações elegíveis — é esta que vai para o relatório")
+a2.set_ylabel("Estações"); a2.set_xlabel("Ano")
 plt.tight_layout()
 plt.savefig(os.path.join(PASTA_SAIDA, "03_estacoes_ativas_por_ano.png"), dpi=150)
 plt.show()
+
+print("total de elegíveis ativas por ano:")
+print(tab_el.sum(axis=1).to_string())
 ''')
 
 code(r'''
@@ -863,6 +908,7 @@ for dh in DESLOCAMENTOS:
     print(f"deslocamento alternativo {dh} h gravado ({len(alt):,} dias) para a análise de sensibilidade")
 
 EST.to_parquet(os.path.join(PASTA_DADOS, "estacoes_elegiveis.parquet"), index=False)
+EST.to_csv(os.path.join(PASTA_SAIDA, "03_estacoes.csv"), index=False)
 AUD_CRIT.to_csv(os.path.join(PASTA_SAIDA, "03_auditoria_por_criterio.csv"), index=False)
 por_rede.to_csv(os.path.join(PASTA_SAIDA, "03_auditoria_por_rede.csv"))
 AUD.to_csv(os.path.join(PASTA_SAIDA, "03_auditoria_por_estacao.csv"), index=False)
@@ -872,6 +918,8 @@ log = {
     "notebook": "03_qualidade_e_preparo", "versao_notebook": "2", "data_execucao": pd.Timestamp.now().isoformat(),
     "decisoes_versao": DEC["versao"], "decisoes_sha256_16": HASH_DECISOES,
     "fuso_confirmado": FUSO_CONFIRMADO, "fuso_fundamento": FUSO_FUNDAMENTO,
+    "redes_excluidas": DEC["dados"].get("redes_excluidas", []),
+    "subconjunto_hidroweb_estacoes": int(EST["subconjunto_hidroweb"].sum()),
     "deslocamentos_agregados_h": DESLOCAMENTOS, "deslocamento_principal_h": DESLOCAMENTO_PRINCIPAL,
     "deslocamento_otimo_medido": otimos.to_dict("records"),
     "modulo_qc": "qc_uniplu.py v2.1", "pandas": pd.__version__, "python": platform.python_version(),

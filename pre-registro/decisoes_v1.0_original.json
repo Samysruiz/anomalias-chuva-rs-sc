@@ -1,0 +1,90 @@
+{
+  "_sobre": "Decisoes pre-registradas em 12/11/2026, antes de treinar qualquer modelo e antes de qualquer avaliacao no conjunto de teste. Os notebooks leem este arquivo; alterar um valor aqui depois desta data deve ser registrado no Quadro de decisoes do relatorio KDD, com data e motivo.",
+  "versao": "1.0",
+  "data_registro": "2026-11-12",
+
+  "dados": {
+    "ufs": ["RS", "SC"],
+    "ano_inicial": 1995,
+    "ano_final": 2025,
+    "excluir_time_step_indefinido": true,
+    "redes": "todas"
+  },
+
+  "resolucao": {
+    "passo": "1D",
+    "deslocamento_fechamento_dia": "12h",
+    "intervalo_fechado": "right",
+    "cobertura_minima": 0.9,
+    "verificar_antes": "se a coluna datetime esta em hora local ou em UTC; isso muda a fronteira do dia"
+  },
+
+  "duplicatas": {
+    "valor_igual": "descartar_copia",
+    "valor_diferente": "marcar_falha_em_ambos"
+  },
+
+  "particao": {
+    "treino": ["1995-01-01", "2019-12-31"],
+    "validacao": ["2020-01-01", "2022-12-31"],
+    "teste": ["2023-01-01", "2025-12-31"],
+    "intervalo_entre_conjuntos_dias": "igual ao comprimento da janela",
+    "regra": "estatisticas de normalizacao, calibracao do QC e limiares vem so de treino e validacao; o teste nao e consultado para nenhuma decisao"
+  },
+
+  "estacoes": {
+    "anos_minimos_no_treino": 3,
+    "normalizacao": "por estacao, com estatisticas calculadas somente no treino"
+  },
+
+  "qc": {
+    "calibrar_limiares_espaciais_em": "treino",
+    "min_repeticoes_travado_dias": 7,
+    "observacao": "min_repeticoes=24 da fonte foi definido para dado horario; em dado diario o equivalente fica a calibrar no treino, partindo de 7 dias"
+  },
+
+  "entrada_modelo": {
+    "unidade": "janela por estacao, univariada",
+    "janela_dias": 15,
+    "ablacao_janela_dias": [7, 30],
+    "passo_janela_dias": 1
+  },
+
+  "modelos": {
+    "nivel_1": "limiar de chuva acumulada na janela, percentil 99 por estacao no treino",
+    "nivel_2": "PCA com componentes que explicam 90% da variancia no treino",
+    "nivel_3": "autoencoder",
+    "nivel_4": "Isolation Forest",
+    "sementes": [0, 1, 2, 3, 4],
+    "treino_autoencoder": "checkpoint a cada epoca e preservacao do melhor modelo na validacao"
+  },
+
+  "pontuacao_e_alarme": {
+    "limiar_estacao": "percentil 99 do escore na validacao",
+    "sensibilidade_limiar_estacao": [95, 99.5],
+    "alarme_regional": "dia em alarme no estado quando a fracao de estacoes ativas acima do limiar atinge f",
+    "calibracao_de_f": "na validacao, valor de f que deixa no maximo 1% dos dias em alarme",
+    "sensibilidade_f": ["0.5% dos dias", "2% dos dias"]
+  },
+
+  "eventos": {
+    "fonte_primaria": "REINDESC (Cemaden)",
+    "prazo_confirmacao_fonte_primaria": "2026-11-18",
+    "plano_b": "lista curta de grandes eventos em RS e SC no periodo de teste, cada um com fonte citada, fechada ANTES de qualquer avaliacao no teste",
+    "camada_secundaria": "cota da HidroWebService (ANA), se o erro 406 for resolvido",
+    "regra_deteccao": "evento detectado se houver ao menos um dia de alarme regional entre 3 dias antes do inicio e o fim do evento"
+  },
+
+  "metricas": {
+    "principais": ["recall por evento", "alarmes falsos por ano", "antecedencia em dias"],
+    "complementar": "PR-AUC em nivel diario",
+    "dispersao": "media e desvio padrao nas 5 sementes"
+  },
+
+  "criterios_de_refutacao": [
+    "o autoencoder nao supera o PCA de forma consistente nas 5 sementes",
+    "o escore nao se eleva nos dias dos eventos do teste",
+    "nenhum modelo supera o limiar de chuva acumulada",
+    "a variabilidade entre sementes excede a diferenca entre modelos"
+  ]
+}

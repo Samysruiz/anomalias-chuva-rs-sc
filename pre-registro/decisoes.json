@@ -1,90 +1,182 @@
 {
-  "_sobre": "Decisoes pre-registradas em 12/11/2026, antes de treinar qualquer modelo e antes de qualquer avaliacao no conjunto de teste. Os notebooks leem este arquivo; alterar um valor aqui depois desta data deve ser registrado no Quadro de decisoes do relatorio KDD, com data e motivo.",
-  "versao": "1.0",
-  "data_registro": "2026-11-12",
-
-  "dados": {
-    "ufs": ["RS", "SC"],
-    "ano_inicial": 1995,
-    "ano_final": 2025,
-    "excluir_time_step_indefinido": true,
-    "redes": "todas"
-  },
-
-  "resolucao": {
-    "passo": "1D",
-    "deslocamento_fechamento_dia": "12h",
-    "intervalo_fechado": "right",
-    "cobertura_minima": 0.9,
-    "verificar_antes": "se a coluna datetime esta em hora local ou em UTC; isso muda a fronteira do dia"
-  },
-
-  "duplicatas": {
-    "valor_igual": "descartar_copia",
-    "valor_diferente": "marcar_falha_em_ambos"
-  },
-
-  "particao": {
-    "treino": ["1995-01-01", "2019-12-31"],
-    "validacao": ["2020-01-01", "2022-12-31"],
-    "teste": ["2023-01-01", "2025-12-31"],
-    "intervalo_entre_conjuntos_dias": "igual ao comprimento da janela",
-    "regra": "estatisticas de normalizacao, calibracao do QC e limiares vem so de treino e validacao; o teste nao e consultado para nenhuma decisao"
-  },
-
-  "estacoes": {
-    "anos_minimos_no_treino": 3,
-    "normalizacao": "por estacao, com estatisticas calculadas somente no treino"
-  },
-
-  "qc": {
-    "calibrar_limiares_espaciais_em": "treino",
-    "min_repeticoes_travado_dias": 7,
-    "observacao": "min_repeticoes=24 da fonte foi definido para dado horario; em dado diario o equivalente fica a calibrar no treino, partindo de 7 dias"
-  },
-
-  "entrada_modelo": {
-    "unidade": "janela por estacao, univariada",
-    "janela_dias": 15,
-    "ablacao_janela_dias": [7, 30],
-    "passo_janela_dias": 1
-  },
-
-  "modelos": {
-    "nivel_1": "limiar de chuva acumulada na janela, percentil 99 por estacao no treino",
-    "nivel_2": "PCA com componentes que explicam 90% da variancia no treino",
-    "nivel_3": "autoencoder",
-    "nivel_4": "Isolation Forest",
-    "sementes": [0, 1, 2, 3, 4],
-    "treino_autoencoder": "checkpoint a cada epoca e preservacao do melhor modelo na validacao"
-  },
-
-  "pontuacao_e_alarme": {
-    "limiar_estacao": "percentil 99 do escore na validacao",
-    "sensibilidade_limiar_estacao": [95, 99.5],
-    "alarme_regional": "dia em alarme no estado quando a fracao de estacoes ativas acima do limiar atinge f",
-    "calibracao_de_f": "na validacao, valor de f que deixa no maximo 1% dos dias em alarme",
-    "sensibilidade_f": ["0.5% dos dias", "2% dos dias"]
-  },
-
-  "eventos": {
-    "fonte_primaria": "REINDESC (Cemaden)",
-    "prazo_confirmacao_fonte_primaria": "2026-11-18",
-    "plano_b": "lista curta de grandes eventos em RS e SC no periodo de teste, cada um com fonte citada, fechada ANTES de qualquer avaliacao no teste",
-    "camada_secundaria": "cota da HidroWebService (ANA), se o erro 406 for resolvido",
-    "regra_deteccao": "evento detectado se houver ao menos um dia de alarme regional entre 3 dias antes do inicio e o fim do evento"
-  },
-
-  "metricas": {
-    "principais": ["recall por evento", "alarmes falsos por ano", "antecedencia em dias"],
-    "complementar": "PR-AUC em nivel diario",
-    "dispersao": "media e desvio padrao nas 5 sementes"
-  },
-
-  "criterios_de_refutacao": [
-    "o autoencoder nao supera o PCA de forma consistente nas 5 sementes",
-    "o escore nao se eleva nos dias dos eventos do teste",
-    "nenhum modelo supera o limiar de chuva acumulada",
-    "a variabilidade entre sementes excede a diferenca entre modelos"
+ "_sobre": "Decisoes pre-registradas em 12/11/2026, antes de treinar qualquer modelo e antes de qualquer avaliacao no conjunto de teste. Os notebooks leem este arquivo; alterar um valor aqui depois desta data deve ser registrado no Quadro de decisoes do relatorio KDD, com data e motivo. VERSAO 1.1, de 12/11/2026: emendas feitas no mesmo dia, antes de qualquer treinamento e sem que existisse qualquer pontuacao de modelo. O arquivo original esta congelado em decisoes_v1.0_original.json, com sha256_16 9e95c5fe56841bf7. Toda emenda esta listada no bloco 'emendas'.",
+ "versao": "1.1",
+ "data_registro": "2026-11-12",
+ "dados": {
+  "ufs": [
+   "RS",
+   "SC"
+  ],
+  "ano_inicial": 1995,
+  "ano_final": 2025,
+  "excluir_time_step_indefinido": true,
+  "redes": "todas",
+  "redes_excluidas": [
+   "CEMADEN",
+   "ICEA"
+  ],
+  "motivo_redes_excluidas": "CEMADEN: nenhuma das 935 estacoes atinge o criterio pre-registrado de elegibilidade (0,7% dos dias com cobertura minima, cerca de 1,3 dia valido por estacao por ano) e a rede muda de regime em 2018 (350 estacoes ativas em 2017 contra 36 em 2018), atravessando a fronteira treino/teste. ICEA: perfil de disponibilidade compativel com hora local enquanto as demais redes sao tratadas como UTC; 4 estacoes elegiveis nao compensam o risco de misturar bases de tempo."
+ },
+ "resolucao": {
+  "passo": "1D",
+  "deslocamento_fechamento_dia": "12h",
+  "intervalo_fechado": "right",
+  "cobertura_minima": 0.9,
+  "verificar_antes": "se a coluna datetime esta em hora local ou em UTC; isso muda a fronteira do dia",
+  "base_de_tempo_do_carimbo": "UTC",
+  "fundamento_base_de_tempo": "afirmacao dos autores do UNIPLU-BR, verificacao independente do AIR Centre (parcial: zona UTC-3 inconclusiva no relatorio original) e coerencia com o maximo convectivo local",
+  "deslocamento_medido_nao_adotado": "20h maximiza o alinhamento em RS/2015 (0,722 contra 0,648), mas em SC/2020 produz 0,701 contra 0,714 do valor pre-registrado; emenda NAO feita, 12h mantido"
+ },
+ "duplicatas": {
+  "valor_igual": "descartar_copia",
+  "valor_diferente": "marcar_falha_em_ambos"
+ },
+ "particao": {
+  "treino": [
+   "1995-01-01",
+   "2019-12-31"
+  ],
+  "validacao": [
+   "2020-01-01",
+   "2022-12-31"
+  ],
+  "teste": [
+   "2023-01-01",
+   "2025-12-31"
+  ],
+  "intervalo_entre_conjuntos_dias": "igual ao comprimento da janela",
+  "regra": "estatisticas de normalizacao, calibracao do QC e limiares vem so de treino e validacao; o teste nao e consultado para nenhuma decisao"
+ },
+ "estacoes": {
+  "anos_minimos_no_treino": 3,
+  "normalizacao": "por estacao, com estatisticas calculadas somente no treino"
+ },
+ "qc": {
+  "calibrar_limiares_espaciais_em": "treino",
+  "min_repeticoes_travado_dias": 7,
+  "observacao": "min_repeticoes=24 da fonte foi definido para dado horario; em dado diario o equivalente fica a calibrar no treino, partindo de 7 dias"
+ },
+ "entrada_modelo": {
+  "unidade": "janela por estacao, univariada",
+  "janela_dias": 15,
+  "ablacao_janela_dias": [
+   7,
+   30
+  ],
+  "passo_janela_dias": 1
+ },
+ "modelos": {
+  "nivel_1": "limiar de chuva acumulada na janela, percentil 99 por estacao no treino",
+  "nivel_2": "PCA com componentes que explicam 90% da variancia no treino",
+  "nivel_3": "autoencoder",
+  "nivel_4": "Isolation Forest",
+  "sementes": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "treino_autoencoder": "checkpoint a cada epoca e preservacao do melhor modelo na validacao"
+ },
+ "pontuacao_e_alarme": {
+  "limiar_estacao": "percentil 99 do escore na validacao",
+  "sensibilidade_limiar_estacao": [
+   95,
+   99.5
+  ],
+  "alarme_regional": "dia em alarme no estado quando a fracao de estacoes ativas acima do limiar atinge f",
+  "calibracao_de_f": "na validacao, valor de f que deixa no maximo 1% dos dias em alarme",
+  "sensibilidade_f": [
+   "0.5% dos dias",
+   "2% dos dias"
+  ],
+  "segundo_ponto_de_operacao": "3% dos dias",
+  "motivo_segundo_ponto": "a 1% dos dias ha cerca de 3,7 dias de alarme por ano contra cerca de 6 eventos severos por estado por ano, o que impoe teto de recall de ~61% no RS e ~58% em SC qualquer que seja o modelo"
+ },
+ "eventos": {
+  "fonte_primaria": "REINDESC (Cemaden)",
+  "prazo_confirmacao_fonte_primaria": "2026-11-18",
+  "plano_b": "lista curta de grandes eventos em RS e SC no periodo de teste, cada um com fonte citada, fechada ANTES de qualquer avaliacao no teste",
+  "camada_secundaria": "cota da HidroWebService (ANA), se o erro 406 for resolvido",
+  "regra_deteccao": "evento detectado se houver ao menos um dia de alarme regional entre 3 dias antes do inicio e o fim do evento",
+  "definicao_de_episodio": "ocorrencias da mesma UF com intervalo de ate 2 dias entre dias consecutivos",
+  "conjunto_principal": "episodio com ao menos uma ocorrencia de magnitude GP ou MP do REINDESC",
+  "conjunto_secundario": "todos os episodios, sem filtro de magnitude",
+  "estratificacao": "extenso (>=5 municipios) e local (<5 municipios)",
+  "sensibilidade_agrupamento_dias": [
+   1,
+   2,
+   3,
+   5
+  ],
+  "nao_preregistrado": [
+   "definicao_de_episodio",
+   "conjunto_principal",
+   "estratificacao",
+   "sensibilidade_agrupamento_dias"
   ]
+ },
+ "metricas": {
+  "principais": [
+   "recall por evento",
+   "alarmes falsos por ano",
+   "antecedencia em dias"
+  ],
+  "complementar": "PR-AUC em nivel diario",
+  "dispersao": "media e desvio padrao nas 5 sementes"
+ },
+ "criterios_de_refutacao": [
+  "o autoencoder nao supera o PCA de forma consistente nas 5 sementes",
+  "o escore nao se eleva nos dias dos eventos do teste",
+  "nenhum modelo supera o limiar de chuva acumulada",
+  "a variabilidade entre sementes excede a diferenca entre modelos",
+  "o resultado nao se reproduzir na replicacao restrita a rede Hidroweb diario, unica com composicao estavel nos 31 anos (326 estacoes em 1995, 414 em 2017, 336 em 2025); nesse caso o achado e artefato de mistura de redes"
+ ],
+ "avaliacao": {
+  "dias_antes_do_inicio": 3,
+  "observacao": "sincronizacao: a regra ja constava do texto em eventos.regra_deteccao; aqui fica em campo proprio para o codigo ler"
+ },
+ "emendas": [
+  {
+   "data": "2026-11-12",
+   "item": "consulta aos rotulos de evento",
+   "detalhe": "REINDESC 2023-2025 de RS e SC inspecionado antes de qualquer treinamento; nenhuma pontuacao de modelo existia"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "base de tempo",
+   "detalhe": "adotado UTC, com ressalva declarada"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "deslocamento do dia",
+   "detalhe": "medicao registrada, confirmacao falhou em SC/2020, 12h MANTIDO"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "exclusao de redes",
+   "detalhe": "CEMADEN e ICEA excluidas"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "definicao de evento",
+   "detalhe": "episodio por agrupamento de ate 2 dias; principal por magnitude GP ou MP"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "segundo ponto de operacao",
+   "detalhe": "3% dos dias, alem de 1%"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "quinto criterio de refutacao",
+   "detalhe": "replicacao restrita ao Hidroweb diario"
+  },
+  {
+   "data": "2026-11-12",
+   "item": "sincronizacao",
+   "detalhe": "janela de deteccao movida para campo proprio avaliacao.dias_antes_do_inicio"
+  }
+ ]
 }

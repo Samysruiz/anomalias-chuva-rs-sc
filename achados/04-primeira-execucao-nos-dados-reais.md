@@ -116,3 +116,50 @@ de parâmetro.
 - Calibração dos limiares espaciais, que hoje usam valores iniciais.
 - Verificação das condições de uso do REInDesC.
 - Nenhum modelo foi treinado, e nenhuma pontuação existe.
+
+## Adendo de 12/11/2026 — composição do conjunto por ano
+
+Dados exatos em `dados/estacoes_ativas_por_ano.csv` e `dados/estacoes_elegiveis_por_ano.csv`.
+
+### A validação e o teste batem, e é isso que decide
+
+| Período | Estações elegíveis ativas (mín.–máx., média) |
+|---|---|
+| Treino 1995–2019 | 356 a 707, média 484 |
+| Validação 2020–2022 | 608 a 648, média 623 |
+| Teste 2023–2025 | 563 a 621, média 589 |
+
+A fração de alarme regional é calibrada na validação e aplicada ao teste. Os dois têm a mesma
+composição de redes e contagem a 5% de distância, de modo que o ponto de operação não sofre
+deslocamento de composição. Esse risco foi levantado e não se confirmou.
+
+### O desvio está dentro do treino
+
+A Telemetria é **zero de 1995 a 2013**, entra com 65 estações em 2014 e chega a 202 em 2017. Ou
+seja, 19 dos 25 anos de treino não contêm nenhuma estação de telemetria, enquanto no teste ela é
+cerca de 29% das estações ativas.
+
+O desenho absorve boa parte disso, porque cada estação é normalizada pela própria série de treino e
+o alarme é fração e não contagem. O que resta é que o autoencoder aprende "normalidade" sobretudo a
+partir do regime de pluviômetro convencional.
+
+**Daí o quinto critério de refutação** (`pre-registro/decisoes.json` v1.1): replicar a avaliação
+restrita ao Hidroweb diário, única rede com composição estável nos 31 anos — 326 estações em 1995,
+414 em 2017, 336 em 2025, sem nenhuma descontinuidade de entrada. Se o achado só aparecer no
+conjunto completo e sumir no Hidroweb puro, é artefato de mistura de redes.
+
+### O desabamento do CEMADEN, com os números exatos
+
+| Ano | 2016 | 2017 | **2018** | 2019 | 2020 |
+|---|---|---|---|---|---|
+| Estações CEMADEN com ao menos um dia válido | 411 | 350 | **36** | 50 | 72 |
+
+Mesmo nos anos bons, nenhuma é elegível: 2.148.008 dias de estação com 0,7% de cobertura suficiente
+dão cerca de **1,3 dia válido por estação por ano**, contra os 183 exigidos. Não é questão de
+ajustar limiar.
+
+### Outros dois números para o relatório
+
+O Hidroweb diário elegível cai de 414 em 2017 para 336 em 2025, uma redução de 19% na rede que é a
+espinha dorsal do trabalho. A ICEA elegível fica entre 2 e 4 estações por ano, o que torna a sua
+exclusão praticamente gratuita.
