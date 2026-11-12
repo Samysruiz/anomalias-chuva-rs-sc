@@ -53,12 +53,31 @@ Adotado o tempo universal coordenado, com a ressalva descrita em `achados/01-bas
 Não altera parâmetro registrado; fixa a interpretação de um campo cuja base a documentação da fonte
 não esclarece.
 
-### 12/11/2026 — Fronteira do dia: medição registrada, parâmetro mantido
+### 12/11/2026 — Fronteira do dia: confirmação falhou, parâmetro mantido
 
-A medição de `achados/02-fronteira-do-dia.md` indica 20 h como fechamento ótimo, contra as 12 h
-pré-registradas. **O parâmetro principal continua sendo 12 h.** A agregação é feita nos dois
-deslocamentos na mesma passagem, e a troca depende de confirmação em segundo estado e ano. Se
-confirmada, entra aqui como emenda nova, com data.
+A medição em RS/2015 indicava 20 h como fechamento ótimo, contra as 12 h pré-registradas. A
+confirmação em SC/2020 **não reproduziu o ganho**: o máximo ficou em 18 h com 0,717, contra 0,714
+do próprio valor pré-registrado, e 20 h chegou a 0,701, pior que 12 h. **Nenhuma emenda foi feita.**
+O deslocamento principal continua sendo 12 h. Detalhes em `achados/02-fronteira-do-dia.md`.
+
+### 12/11/2026 — Exclusão da rede CEMADEN
+
+Nenhuma das 935 estações CEMADEN atingiu o critério pré-registrado de elegibilidade, porque apenas
+0,7% dos seus dias atingem a cobertura mínima. A causa está documentada em
+`achados/04-primeira-execucao-nos-dados-reais.md`. A exclusão decorre da aplicação do critério
+pré-registrado, e não de parâmetro novo; fica declarada para não ser lida como acidente.
+
+### 12/11/2026 — Exclusão da rede ICEA
+
+Estendida a exclusão a toda a rede ICEA, e não apenas às estações com resolução indeterminada. Motivo:
+o perfil de disponibilidade do ICEA aponta para horário local, enquanto as demais redes são tratadas
+como UTC. Decisão posterior ao pré-registro, declarada como tal.
+
+### Pendência — janela de detecção ausente do arquivo
+
+O `decisoes.json` não contém a janela de detecção de três dias antes do início do evento, que consta
+do texto do pré-registro. Sincronizar o arquivo com o texto, registrando como correção de sincronia,
+não como mudança de parâmetro.
 
 ## Parâmetros usados que o pré-registro não fixa
 

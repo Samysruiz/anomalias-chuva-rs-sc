@@ -1,7 +1,7 @@
 # Achado 2 — Onde fechar o dia agregado
 
-**Data:** 12 de novembro de 2026. **Estado:** medição feita em um estado e um ano; confirmação em
-segundo conjunto pendente. O deslocamento principal continua sendo o pré-registrado.
+**Data:** 12 de novembro de 2026. **Estado:** medido em dois estados e dois anos. **A confirmação
+falhou.** O deslocamento pré-registrado de 12 h é mantido. Ver a seção final.
 
 ## O método
 
@@ -66,3 +66,38 @@ Por isso:
 
 Essa ordem importa: a decisão é de alinhamento de dados, tomada antes de qualquer pontuação de
 modelo, e documentada com a medição que a sustenta.
+
+## A confirmação em SC/2020 não reproduziu o ganho
+
+Dados: `dados/varredura_fechamento_dia_sc2020.csv`. Mesmo procedimento, 20 pares.
+
+| | RS/2015 | SC/2020 |
+|---|---|---|
+| Máximo do grid | H = 20 | H = 18 |
+| Correlação no máximo | 0,722 | 0,717 |
+| Correlação em h = 12 (pré-registrado) | 0,648 | **0,714** |
+| Ganho do máximo sobre o pré-registrado | +0,074 | **+0,003** |
+| Correlação em h = 20 | 0,722 | **0,701** |
+
+Os dois máximos caem na faixa de 18 h a 22 h, que era o critério que eu havia fixado de antemão
+para justificar a emenda. **Mesmo assim a emenda não se faz**, por um motivo que o critério, escrito
+antes de ver o segundo conjunto, não previa: em SC, adotar 20 h produz 0,701, que é **pior** que os
+0,714 do valor pré-registrado. Uma regra que, cumprida à risca, piora metade da evidência é uma
+regra mal escrita. Fica o registro do erro.
+
+Em SC a curva é quase plana de h = 11 a h = 19, variando entre 0,707 e 0,717. Em RS ela tem
+inclinação forte. O ganho medido em RS, portanto, não é propriedade geral da convenção das estações
+diárias.
+
+**Hipótese para a diferença, não testada:** o parceiro sub-diário de cada par muda entre os dois
+conjuntos. Pelo achado 4, as estações CEMADEN transmitem cerca de 27 leituras por dia, e não as 144
+que o passo declarado faz esperar. Se os pares de RS/2015 forem dominados por parceiros CEMADEN com
+amostragem esparsa, a curva observada ali pode refletir o regime de transmissão da rede, e não a
+fronteira do dia do pluviômetro convencional.
+
+**Decisão:** mantém-se o deslocamento pré-registrado de 12 h. O agregado de 20 h continua gravado e
+entra apenas como análise de sensibilidade. Nenhuma emenda é feita. A perda de alinhamento em RS
+fica declarada como limitação.
+
+Um valor intermediário, h = 18, é o melhor dos dois conjuntos em conjunto, mas seria escolhido
+depois de ver as duas curvas, e exigiria repetir a passagem de controle de qualidade. Não é adotado.

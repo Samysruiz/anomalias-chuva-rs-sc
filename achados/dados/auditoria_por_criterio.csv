@@ -1,0 +1,16 @@
+nivel,criterio,registros,percentual
+original,qc_ausente,0,0.0
+original,qc_negativo,0,0.0
+original,qc_acima_limite_fisico,271,0.0002
+original,qc_duplicata,4987,0.0042
+original,qc_travado,278894,0.2356
+original,qc_oscilacao_rapida,43357,0.0366
+original,qc_estacao_plana,29225,0.0247
+original,qc_limpo_nativo,118016773,99.6987
+original,n_copias_identicas_descartadas,58169,0.0491
+original,n_pares_duplicata_conflitante,2475,0.0021
+diario,qc_travado,2324,0.041
+diario,qc_isolado_espacial,28994,0.5109
+diario,qc_seco_espacial,112155,1.9763
+diario,qc_atipico_iqr,46473,0.8189
+diario,qc_limpo_diario,5531446,97.4718

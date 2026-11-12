@@ -1,0 +1,7 @@
+rede,estacoes_com_registro,registros,pct_limpo_nativo,dias_com_registro,pct_dias_cobertura_ok,frac_zeros_mediana,estacoes_elegiveis,estacoes_total
+CEMADEN,935,57973474,99.45,2148008,0.7,0.762,0,935
+Hidroweb diario,518,4046109,99.99,4253845,95.1,0.698,479,518
+ICEA,14,1270590,97.66,80736,20.5,0.923,4,14
+INMET diario,39,268551,100.0,279090,96.2,0.622,33,44
+INMET subdiario,94,9144185,100.0,420778,88.5,0.909,64,94
+Telemetria,527,45670562,99.99,1220791,78.3,0.92,214,527
