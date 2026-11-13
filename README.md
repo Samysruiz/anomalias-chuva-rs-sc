@@ -23,6 +23,17 @@ pré-registro das hipóteses seja auditável.
 | `achados/` | Cada investigação, com o que foi tentado, o que falhou e os dados de apoio |
 | `codigo/` | Módulo de controle de qualidade, notebooks 03 e 04 e os seus testes |
 | `dados/` | Procedência dos dados e instruções de obtenção. Os dados brutos não estão aqui |
+| `declaracao-uso-de-ia.md` | O que foi assistido por IA, o que foi verificado e por quem |
+
+Os achados, em ordem:
+
+| Achado | Pergunta | Estado |
+|---|---|---|
+| 01 | Em que base de tempo estão os carimbos? | UTC, com ressalva declarada |
+| 02 | Onde fechar o dia agregado? | 12 h mantido; a confirmação falhou em SC |
+| 03 | O que conta como evento no REInDesC? | episódio por agrupamento, severidade pela fonte |
+| 04 | O que a primeira execução sobre os dados reais mostrou? | 790 estações elegíveis; CEMADEN e ICEA fora |
+| 05 | Por que o teste parece mais chuvoso que a validação? | é clima: a validação contém o ano mais seco de 31 |
 
 ## A pergunta
 
