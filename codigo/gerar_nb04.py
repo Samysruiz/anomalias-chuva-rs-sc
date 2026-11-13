@@ -17,7 +17,9 @@ def code(txt):
 md("""
 # 04 — Janelas, normalização e modelos
 
-Projeto final — Aprendizado Não Supervisionado (Wagner). Trabalho individual.
+Projeto final — Aprendizado Não Supervisionado (Wagner). Trabalho do grupo: Felipe Fernandes
+Clivati, Juan Carlos Guatierri Alves, Leonardo Secco Silva, Rafael Lazarin Lobo de Almeida,
+Samara Ruiz Silva e Victor Hugo Stein Blauth.
 
 **Versão 1, 13/11/2026.** Testado com dados sintéticos; ainda não executado nos dados reais.
 
@@ -135,11 +137,20 @@ NORMALIZACAO = "zscore"          # "zscore" | "log1p_zscore" (sensibilidade)
 EXIGIR_JANELA_COMPLETA = True    # janela com qualquer dia ausente é descartada
 MAX_JANELAS_TREINO = int(os.environ.get("NB04_MAX_TREINO", 500_000))   # teto para caber no Colab
 SEMENTE_AMOSTRA = 0
-AE_CAMADAS = [15, 8, 3, 8, 15]   # a primeira e a última são o comprimento da janela
-AE_EPOCAS = int(os.environ.get("NB04_EPOCAS", 30))
+# O gargalo do autoencoder NÃO é parâmetro livre: ele é igualado ao número de componentes que o
+# PCA reteve pela regra pré-registrada de 90% da variância (célula 8). Sem isso, a comparação entre
+# os níveis 2 e 3 mede diferença de capacidade, não o efeito da não linearidade, que é a pergunta
+# do pré-registro. O gargalo de sensibilidade roda em paralelo, como ablação declarada.
+# MODO DEMONSTRAÇÃO: rodada rápida e barata, só para o grupo ver a comparação funcionando.
+# NÃO produz resultado para o relatório. Os arquivos saem com sufixo _demo e nada definitivo
+# é sobrescrito. Para a rodada de verdade, deixe em False.
+MODO_DEMONSTRACAO = True
+
+AE_GARGALO_SENSIBILIDADE = 3
+AE_EPOCAS = int(os.environ.get("NB04_EPOCAS", 150))
 AE_LOTE = 1024
 AE_LR = 1e-3
-AE_PACIENCIA = 8                 # épocas sem melhora na validação antes de parar
+AE_PACIENCIA = 15                # épocas sem melhora na validação antes de parar
 IF_ARVORES = 200
 IF_AMOSTRA = 256
 DESVIO_MINIMO = 1e-6             # piso do desvio na normalização, evita divisão por zero
@@ -149,7 +160,8 @@ NAO_PREREGISTRADOS = {
     "exigir janela completa (sem dia ausente)": EXIGIR_JANELA_COMPLETA,
     "teto de janelas de treino": MAX_JANELAS_TREINO,
     "semente da amostragem de treino": SEMENTE_AMOSTRA,
-    "arquitetura do autoencoder": AE_CAMADAS,
+    "gargalo do autoencoder": "igual ao nº de componentes do PCA (regra pré-registrada de 90%)",
+    "gargalo da ablação do autoencoder": AE_GARGALO_SENSIBILIDADE,
     "épocas, lote e taxa de aprendizado do autoencoder": [AE_EPOCAS, AE_LOTE, AE_LR],
     "paciência (parada antecipada) do autoencoder": AE_PACIENCIA,
     "árvores e amostra do Isolation Forest": [IF_ARVORES, IF_AMOSTRA],
@@ -158,7 +170,24 @@ NAO_PREREGISTRADOS = {
     "deslocamento do dia usado": f"{DESLOC_PRINCIPAL} h (principal, pré-registrado)",
 }
 
-assert AE_CAMADAS[0] == JANELA and AE_CAMADAS[-1] == JANELA, "a arquitetura precisa casar com a janela"
+assert 1 <= AE_GARGALO_SENSIBILIDADE < JANELA, "o gargalo da ablação precisa ser menor que a janela"
+
+SUFIXO = ""
+if MODO_DEMONSTRACAO:
+    SUFIXO = "_demo"
+    MAX_JANELAS_TREINO = min(MAX_JANELAS_TREINO, 100_000)
+    AE_EPOCAS = min(AE_EPOCAS, 10)
+    SEMENTES = SEMENTES[:2]
+    NAO_PREREGISTRADOS["MODO DEMONSTRAÇÃO"] = (
+        f"ligado: {MAX_JANELAS_TREINO} janelas, {AE_EPOCAS} épocas, sementes {SEMENTES}")
+    print("\n" + "=" * 78)
+    print("  MODO DEMONSTRAÇÃO LIGADO")
+    print("  Rodada rápida, apenas para o grupo ver a comparação entre os modelos funcionando.")
+    print("  NÃO use estes números no relatório: o treino é curto, a amostra é menor e são")
+    print("  apenas 2 das 5 sementes pré-registradas.")
+    print(f"  Tudo sai com sufixo '{SUFIXO}' e nada definitivo é sobrescrito.")
+    print("  Para a rodada de verdade, mude MODO_DEMONSTRACAO para False e rode de novo.")
+    print("=" * 78 + "\n")
 print("decisoes.json versão", DEC["versao"], "| sha256", HASH_DECISOES)
 for _e in DEC.get("emendas", []):
     print(f"  emenda {_e['data']}: {_e['item']}")
@@ -341,11 +370,17 @@ escore no **mesmo** formato. A comparação só é honesta se a única coisa que
 |---|---|---|
 | 1 | Chuva acumulada na janela | a própria soma em mm |
 | 2 | PCA com 90% da variância | erro quadrático de reconstrução |
-| 3 | Autoencoder | erro quadrático de reconstrução |
+| 3 | Autoencoder, com gargalo igual ao nº de componentes do PCA | erro quadrático de reconstrução |
 | 4 | Isolation Forest | inverso da facilidade de isolamento |
 
 Níveis 1 e 2 são determinísticos e rodam uma vez. Níveis 3 e 4 rodam com as cinco sementes
 pré-registradas, e o relatório reporta média e desvio padrão entre elas.
+
+**O gargalo do autoencoder é igualado ao número de componentes que o PCA reteve.** Isso não é
+detalhe de implementação: é o que torna a comparação entre os níveis 2 e 3 uma pergunta sobre
+não linearidade, e não sobre capacidade. Um autoencoder com gargalo de 3 contra um PCA de 13
+componentes reconstrói pior por ter menos dimensões, e nada disso diria respeito à não linearidade.
+Um gargalo menor roda em paralelo como ablação declarada.
 """)
 
 code(r'''
@@ -392,6 +427,18 @@ import torch.nn as nn
 DISPOSITIVO = "cuda" if torch.cuda.is_available() else "cpu"
 print("dispositivo:", DISPOSITIVO)
 
+# O gargalo principal é o número de componentes que o PCA reteve pela regra pré-registrada.
+# Assim a comparação entre os níveis 2 e 3 isola a não linearidade, em vez de medir capacidade.
+AE_GARGALO_PRINCIPAL = int(pca.n_components_)
+GARGALOS = [(AE_GARGALO_PRINCIPAL, "nivel3_autoencoder"),
+            (AE_GARGALO_SENSIBILIDADE, f"nivel3_autoencoder_gargalo{AE_GARGALO_SENSIBILIDADE}")]
+print(f"gargalo principal: {AE_GARGALO_PRINCIPAL} (igual ao PCA) | ablação: {AE_GARGALO_SENSIBILIDADE}")
+
+def camadas_de(gargalo):
+    meio = (JANELA + gargalo) // 2
+    seq = [JANELA, meio, gargalo, meio, JANELA]
+    return [c for i, c in enumerate(seq) if i in (0, 2, 4) or (c != gargalo and c != JANELA)]
+
 def monta_ae(camadas):
     blocos, n = [], len(camadas)
     for i in range(n - 1):
@@ -411,49 +458,60 @@ def erro_ae(modelo, X, lote=8192):
 
 HIST_AE = []
 t0 = time.time()
-for semente in SEMENTES:
-    torch.manual_seed(semente)
-    np.random.seed(semente)
-    modelo = monta_ae(AE_CAMADAS).to(DISPOSITIVO)
-    otim = torch.optim.Adam(modelo.parameters(), lr=AE_LR)
-    perda_fn = nn.MSELoss()
-    Xtr_t = torch.from_numpy(X_tr)
-    melhor, melhor_epoca, sem_melhora = np.inf, -1, 0
-    caminho_melhor = os.path.join(PASTA_MODELOS, f"ae_semente{semente}_melhor.pt")
+for gargalo, nome_modelo in GARGALOS:
+    camadas = camadas_de(gargalo)
+    print(f"\n--- {nome_modelo} | arquitetura {camadas} ---")
+    for semente in SEMENTES:
+        torch.manual_seed(semente)
+        np.random.seed(semente)
+        modelo = monta_ae(camadas).to(DISPOSITIVO)
+        otim = torch.optim.Adam(modelo.parameters(), lr=AE_LR)
+        perda_fn = nn.MSELoss()
+        Xtr_t = torch.from_numpy(X_tr)
+        melhor, melhor_epoca, sem_melhora = np.inf, -1, 0
+        marca = f"g{gargalo}_semente{semente}"
+        caminho_melhor = os.path.join(PASTA_MODELOS, f"ae_{marca}{SUFIXO}_melhor.pt")
 
-    for epoca in range(1, AE_EPOCAS + 1):
-        modelo.train()
-        ordem = torch.randperm(len(Xtr_t))
-        soma, n = 0.0, 0
-        for i in range(0, len(ordem), AE_LOTE):
-            b = Xtr_t[ordem[i:i + AE_LOTE]].to(DISPOSITIVO)
-            otim.zero_grad()
-            perda = perda_fn(modelo(b), b)
-            perda.backward()
-            otim.step()
-            soma += float(perda) * len(b); n += len(b)
-        perda_tr = soma / max(n, 1)
-        perda_va = float(np.mean(erro_ae(modelo, X_va)))
-        HIST_AE.append({"semente": semente, "epoca": epoca, "perda_treino": perda_tr, "perda_validacao": perda_va})
-        # checkpoint a cada época, como o pré-registro exige
-        torch.save({"epoca": epoca, "estado": modelo.state_dict(), "perda_validacao": perda_va},
-                   os.path.join(PASTA_MODELOS, f"ae_semente{semente}_epoca{epoca:03d}.pt"))
-        if perda_va < melhor:
-            melhor, melhor_epoca, sem_melhora = perda_va, epoca, 0
-            torch.save({"epoca": epoca, "estado": modelo.state_dict(), "perda_validacao": perda_va}, caminho_melhor)
-        else:
-            sem_melhora += 1
-            if sem_melhora >= AE_PACIENCIA:
-                print(f"  semente {semente}: parada antecipada na época {epoca}")
-                break
+        for epoca in range(1, AE_EPOCAS + 1):
+            modelo.train()
+            ordem = torch.randperm(len(Xtr_t))
+            soma, n = 0.0, 0
+            for i in range(0, len(ordem), AE_LOTE):
+                b = Xtr_t[ordem[i:i + AE_LOTE]].to(DISPOSITIVO)
+                otim.zero_grad()
+                perda = perda_fn(modelo(b), b)
+                perda.backward()
+                otim.step()
+                soma += float(perda.detach()) * len(b); n += len(b)
+            perda_tr = soma / max(n, 1)
+            perda_va = float(np.mean(erro_ae(modelo, X_va)))
+            HIST_AE.append({"gargalo": gargalo, "semente": semente, "epoca": epoca,
+                            "perda_treino": perda_tr, "perda_validacao": perda_va})
+            # checkpoint a cada época, como o pré-registro exige
+            torch.save({"epoca": epoca, "estado": modelo.state_dict(), "perda_validacao": perda_va},
+                       os.path.join(PASTA_MODELOS, f"ae_{marca}{SUFIXO}_epoca{epoca:03d}.pt"))
+            if perda_va < melhor - 1e-6:
+                melhor, melhor_epoca, sem_melhora = perda_va, epoca, 0
+                torch.save({"epoca": epoca, "estado": modelo.state_dict(), "perda_validacao": perda_va},
+                           caminho_melhor)
+            else:
+                sem_melhora += 1
+                if sem_melhora >= AE_PACIENCIA:
+                    break
 
-    modelo.load_state_dict(torch.load(caminho_melhor, map_location=DISPOSITIVO)["estado"])
-    ESCORES[("nivel3_autoencoder", semente)] = {"validacao": erro_ae(modelo, X_va), "teste": erro_ae(modelo, X_te)}
-    print(f"semente {semente}: melhor época {melhor_epoca}, perda na validação {melhor:.5f}")
+        modelo.load_state_dict(torch.load(caminho_melhor, map_location=DISPOSITIVO)["estado"])
+        ESCORES[(nome_modelo, semente)] = {"validacao": erro_ae(modelo, X_va), "teste": erro_ae(modelo, X_te)}
+        aviso = "  <-- ATENCAO: parou no teto de epocas, pode estar subtreinado" if melhor_epoca == AE_EPOCAS else ""
+        print(f"  semente {semente}: melhor época {melhor_epoca} de {AE_EPOCAS}, "
+              f"perda na validação {melhor:.5f}{aviso}")
 
 HIST_AE = pd.DataFrame(HIST_AE)
 print(f"\nautoencoder pronto em {time.time() - t0:.0f} s")
-print(HIST_AE.groupby("semente")["perda_validacao"].agg(["min", "idxmin", "count"]).to_string())
+resumo = HIST_AE.loc[HIST_AE.groupby(["gargalo", "semente"])["perda_validacao"].idxmin(),
+                     ["gargalo", "semente", "epoca", "perda_validacao"]]
+print(resumo.to_string(index=False))
+if (resumo["epoca"] == AE_EPOCAS).any():
+    print("\nATENCAO: alguma semente teve a melhor epoca no teto. Aumente AE_EPOCAS e rode de novo.")
 ''')
 
 code(r'''
@@ -487,36 +545,45 @@ for (modelo, semente), d in ESCORES.items():
 S = pd.concat(partes, ignore_index=True)
 S["no_hidroweb"] = S["gauge_code"].isin(hidroweb)
 
-arq = os.path.join(PASTA_DADOS, "escores_04.parquet")
+arq = os.path.join(PASTA_DADOS, f"escores_04{SUFIXO}.parquet")
 S.to_parquet(arq, index=False)
-HIST_AE.to_csv(os.path.join(PASTA_SAIDA, "04_historico_autoencoder.csv"), index=False)
-AUD_JAN.to_csv(os.path.join(PASTA_SAIDA, "04_auditoria_janelas.csv"), index=False)
+HIST_AE.to_csv(os.path.join(PASTA_SAIDA, f"04_historico_autoencoder{SUFIXO}.csv"), index=False)
+AUD_JAN.to_csv(os.path.join(PASTA_SAIDA, f"04_auditoria_janelas{SUFIXO}.csv"), index=False)
 P99_TREINO.rename("p99_acumulado_treino").to_frame().assign(
     gauge_code=lambda t: estacoes[t.index.to_numpy()]).to_csv(
-    os.path.join(PASTA_SAIDA, "04_nivel1_p99_treino.csv"), index=False)
+    os.path.join(PASTA_SAIDA, f"04_nivel1_p99_treino{SUFIXO}.csv"), index=False)
 
 print(f"{len(S):,} linhas de escore gravadas em {arq}")
 print(S.groupby(["modelo", "conjunto"])["escore"].agg(["size", "median"]).to_string())
 
 log = {
-    "notebook": "04_janelas_e_modelos", "versao_notebook": "1",
+    "notebook": "04_janelas_e_modelos", "versao_notebook": "2",
+    "modo_demonstracao": MODO_DEMONSTRACAO,
     "data_execucao": pd.Timestamp.now().isoformat(),
     "decisoes_versao": DEC["versao"], "decisoes_sha256_16": HASH_DECISOES,
     "janela_dias": JANELA, "gap_entre_particoes_dias": int(GAP),
     "deslocamento_h": DESLOC_PRINCIPAL, "normalizacao": NORMALIZACAO,
     "janelas": {k: int(len(v[0])) for k, v in IDX.items()},
     "pca_componentes": int(pca.n_components_),
+    "ae_gargalo_principal": int(AE_GARGALO_PRINCIPAL),
+    "ae_gargalo_ablacao": int(AE_GARGALO_SENSIBILIDADE),
+    "ae_melhor_epoca": resumo.to_dict("records"),
     "pca_variancia_explicada": float(pca.explained_variance_ratio_.sum()),
     "dispositivo": DISPOSITIVO, "torch": torch.__version__,
     "pandas": pd.__version__, "python": platform.python_version(),
     "parametros_nao_preregistrados": NAO_PREREGISTRADOS,
 }
-with open(os.path.join(PASTA_SAIDA, "04_log_execucao.json"), "w", encoding="utf-8") as f:
+with open(os.path.join(PASTA_SAIDA, f"04_log_execucao{SUFIXO}.json"), "w", encoding="utf-8") as f:
     json.dump(log, f, ensure_ascii=False, indent=2, default=str)
 
 print("\nPARÂMETROS NÃO PRÉ-REGISTRADOS (Quadro de decisões do relatório):")
 for k, v in NAO_PREREGISTRADOS.items():
     print(" -", k, "=", v)
+if MODO_DEMONSTRACAO:
+    print("\n" + "=" * 78)
+    print("  ESTES NÚMEROS SÃO DE DEMONSTRAÇÃO E NÃO VÃO PARA O RELATÓRIO.")
+    print("  Para a rodada definitiva: MODO_DEMONSTRACAO = False na célula 2.")
+    print("=" * 78)
 print("\nMANDE AO CLAUDE: as saídas das células 5, 6, 8, 9 e 11.")
 ''')
 

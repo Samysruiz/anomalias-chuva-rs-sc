@@ -87,11 +87,16 @@ print(f"sintetico: {len(D):,} linhas, {len(estacoes)} estacoes, {len(EV)} evento
 
 # ---------------------------------------------------------------- executar
 nb = json.load(open(NB, encoding="utf-8"))
+DEMO = os.environ.get("TESTE_DEMO") == "1"
 fonte = ["import os", f"os.environ['NB04_RAIZ_TESTE'] = {RAIZ!r}",
          "os.environ['NB04_EPOCAS'] = '3'", "os.environ['NB04_MAX_TREINO'] = '20000'"]
 for c in nb["cells"]:
     if c["cell_type"] == "code":
-        fonte.append("".join(c["source"]))
+        src = "".join(c["source"])
+        if not DEMO:
+            src = src.replace("MODO_DEMONSTRACAO = True", "MODO_DEMONSTRACAO = False")
+        fonte.append(src)
+print("modo:", "DEMONSTRACAO" if DEMO else "DEFINITIVO")
 script = f"{RAIZ}/nb04_exec.py"
 open(script, "w", encoding="utf-8").write("\n\n".join(fonte))
 
@@ -104,16 +109,22 @@ if r.returncode != 0:
 checa("notebook executa sem erro", True)
 
 # ---------------------------------------------------------------- verificar
-S = pd.read_parquet(f"{RAIZ}/06_dados/escores_04.parquet")
+SUF = "_demo" if DEMO else ""
+S = pd.read_parquet(f"{RAIZ}/06_dados/escores_04{SUF}.parquet")
 S["dia"] = pd.to_datetime(S["dia"])
-log = json.load(open(f"{RAIZ}/05_saidas/04_log_execucao.json", encoding="utf-8"))
+log = json.load(open(f"{RAIZ}/05_saidas/04_log_execucao{SUF}.json", encoding="utf-8"))
 
-checa("quatro niveis pontuados", S["modelo"].nunique() == 4, sorted(S["modelo"].unique()))
+niveis = set(S["modelo"].unique())
+esperados = {"nivel1_acumulado", "nivel2_pca", "nivel3_autoencoder", "nivel4_isolation"}
+checa("quatro niveis pre-registrados pontuados", esperados <= niveis, sorted(niveis))
+ablacoes = niveis - esperados
+checa("ablacao de gargalo do autoencoder presente", len(ablacoes) == 1, sorted(ablacoes))
 checa("so validacao e teste gravados", set(S["conjunto"]) == {"validacao", "teste"}, set(S["conjunto"]))
 sem_ae = sorted(S.loc[S["modelo"] == "nivel3_autoencoder", "semente"].unique())
-checa("autoencoder com 5 sementes", sem_ae == [0, 1, 2, 3, 4], sem_ae)
+esperadas = [0, 1] if DEMO else [0, 1, 2, 3, 4]
+checa("sementes do autoencoder", sem_ae == esperadas, sem_ae)
 sem_if = sorted(S.loc[S["modelo"] == "nivel4_isolation", "semente"].unique())
-checa("isolation forest com 5 sementes", sem_if == [0, 1, 2, 3, 4], sem_if)
+checa("sementes do isolation forest", sem_if == esperadas, sem_if)
 
 # vazamento: nenhuma janela de teste usa dia de validacao
 JAN = int(log["janela_dias"])
@@ -135,10 +146,13 @@ checa("PCA retem pelo menos 90% da variancia", log["pca_variancia_explicada"] >=
 ck = os.listdir(f"{RAIZ}/06_dados/_modelos_04")
 por_epoca = [f for f in ck if "_epoca" in f]
 melhores = [f for f in ck if f.endswith("_melhor.pt")]
-checa("checkpoint gravado a cada epoca", len(por_epoca) >= 5 * 3, f"{len(por_epoca)} arquivos")
-checa("melhor modelo por semente preservado", len(melhores) == 5, melhores)
+checa("checkpoint gravado a cada epoca", len(por_epoca) >= 2 * len(esperadas) * 3, f"{len(por_epoca)} arquivos")
+checa("melhor modelo por semente e por gargalo preservado", len(melhores) == 2 * len(esperadas),
+      f"{len(melhores)} arquivos: {sorted(melhores)}")
+gargalos = {f.split("_")[1] for f in melhores}
+checa("dois gargalos treinados", len(gargalos) == 2, sorted(gargalos))
 
-H = pd.read_csv(f"{RAIZ}/05_saidas/04_historico_autoencoder.csv")
+H = pd.read_csv(f"{RAIZ}/05_saidas/04_historico_autoencoder{SUF}.csv")
 checa("historico tem perda de treino e validacao por epoca",
       {"semente", "epoca", "perda_treino", "perda_validacao"} <= set(H.columns), list(H.columns))
 
@@ -155,6 +169,15 @@ for modelo in ("nivel1_acumulado", "nivel2_pca", "nivel3_autoencoder", "nivel4_i
     fora = sub.loc[~janela_ev.reindex(sub.index, fill_value=False), "escore"].median()
     checa(f"evento plantado pontua acima do normal em {modelo}", dentro > fora,
           f"dentro {dentro:.4f} vs fora {fora:.4f}")
+
+checa("gargalo principal igual ao numero de componentes do PCA",
+      int(log["ae_gargalo_principal"]) == int(log["pca_componentes"]),
+      f"gargalo {log['ae_gargalo_principal']} vs PCA {log['pca_componentes']}")
+checa("melhor epoca registrada no log", len(log["ae_melhor_epoca"]) == 2 * len(esperadas), len(log.get("ae_melhor_epoca", [])))
+checa("modo registrado no log", log["modo_demonstracao"] == DEMO, log["modo_demonstracao"])
+if DEMO:
+    checa("saidas definitivas nao foram sobrescritas",
+          not os.path.exists(f"{RAIZ}/06_dados/escores_04.parquet"))
 
 # normalizacao so do treino: o log tem que registrar a forma usada
 checa("forma da normalizacao registrada", log["normalizacao"] in ("zscore", "log1p_zscore"), log["normalizacao"])

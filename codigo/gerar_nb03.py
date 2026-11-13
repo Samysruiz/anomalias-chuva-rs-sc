@@ -15,7 +15,9 @@ def code(t):
 md("""
 # 03 — Qualidade e preparo dos dados
 
-Projeto final — Aprendizado Não Supervisionado (Wagner). Trabalho individual.
+Projeto final — Aprendizado Não Supervisionado (Wagner). Trabalho do grupo: Felipe Fernandes
+Clivati, Juan Carlos Guatierri Alves, Leonardo Secco Silva, Rafael Lazarin Lobo de Almeida,
+Samara Ruiz Silva e Victor Hugo Stein Blauth.
 
 **Versão 2, 12/11/2026.** A versão 1 foi escrita de manhã e testada só com dados sintéticos.
 Esta versão incorpora os diagnósticos rodados nos dados reais ao longo do dia 12/11 e
