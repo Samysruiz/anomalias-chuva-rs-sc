@@ -53,8 +53,10 @@ dezembro de 2026.
 ## Procedência dos dados
 
 - **Treinamento:** UNIPLU-BR (LEMOS et al., 2026), Zenodo, DOI 10.5281/zenodo.18883358, licença CC BY 4.0.
-- **Rótulos de avaliação:** REInDesC, Cemaden, https://reindesc.cemaden.gov.br. Condições de uso
-  não verificadas nesta data, razão pela qual as ocorrências exportadas **não** são redistribuídas aqui.
+- **Rótulos de avaliação:** REInDesC, Cemaden, https://reindesc.cemaden.gov.br, acesso em
+  13 nov. 2026. Base descrita em BERNARDES, T. et al., *International Journal of Disaster Risk
+  Reduction*, v. 137, art. 106099, 2026 (acesso aberto). Acesso público e gratuito, **sem termos
+  explícitos de licenciamento**, razão pela qual as ocorrências exportadas não são redistribuídas aqui.
 - **Referência de controle de qualidade:** pipeline do AIR Centre (PINELO, 2026),
   https://github.com/AIRCentre/UNIPLU-BR, licença MIT.
 

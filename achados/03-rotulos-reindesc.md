@@ -107,7 +107,23 @@ Daí decorrem três vieses:
 2. dano causado por chuva a montante é evento sem chuva local, e conta como falha de detecção;
 3. a cobertura espacial é só dos municípios monitorados.
 
-## Pendência
+## Condições de uso — verificado em 13/11/2026
 
-As condições de uso do REInDesC não foram verificadas. O manual institucional não as apresenta.
-Até a verificação, os registros brutos não são redistribuídos neste repositório.
+Acesso público e gratuito, sem necessidade de credenciamento. **Não há termos explícitos de
+licenciamento** na plataforma nem no manual institucional. Ausência de licença explícita autoriza
+usar e citar, não redistribuir: por isso os 706 registros brutos ficam fora deste repositório e
+apenas as contagens derivadas entram.
+
+A base dispõe de artigo descritivo revisado por pares e de acesso aberto:
+
+> BERNARDES, T. et al. A multisource information system in support of early warning systems in
+> Brazil: the REINDESC database. *International Journal of Disaster Risk Reduction*, v. 137,
+> art. 106099, 2026. DOI: 10.1016/j.ijdrr.2026.106099.
+
+É a referência correta da base, e nele os próprios responsáveis declaram as limitações e lacunas
+da consolidação. Há precedente revisado por pares de uso dos dados citando o artigo mais o endereço
+da plataforma com data de acesso, que é a prática adotada aqui.
+
+Correção de registro: uma atribuição anterior a "Marengo et al." havia sido vista apenas em página
+agregadora e estava marcada como não verificada. O primeiro autor é Bernardes; Marengo é o último.
+A lista completa de autores deve ser preenchida a partir do artigo, que é aberto.
