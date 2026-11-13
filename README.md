@@ -1,8 +1,15 @@
 # Detecção não supervisionada de anomalias de precipitação associadas a cheias no RS e em SC
 
 Projeto final da disciplina Aprendizado Não Supervisionado, curso de Inteligência Artificial da
-Faculdade Donaduzzi (Toledo, PR). Autoria: Samara Ruiz Silva. Orientação: Prof. Wagner.
-Trabalho individual.
+Faculdade Donaduzzi (Toledo, PR). Orientação: Prof. Wagner.
+
+**Grupo:** Felipe Fernandes Clivati, Juan Carlos Guatierri Alves, Leonardo Secco Silva,
+Rafael Lazarin Lobo de Almeida, Samara Ruiz Silva e Victor Hugo Stein Blauth.
+
+Seleção, pré-processamento, transformação e este registro foram conduzidos por Samara Ruiz Silva
+entre 10 e 13 de novembro de 2026. A modelagem está dividida em quatro frentes independentes que
+partem da mesma entrada — limiar acumulado, PCA, autoencoder e Isolation Forest — e a atribuição
+de cada uma é registrada no histórico de commits à medida que for assumida.
 
 ## O que está neste repositório
 
@@ -14,7 +21,7 @@ pré-registro das hipóteses seja auditável.
 |---|---|
 | `pre-registro/` | Parâmetros fixados antes de qualquer treinamento, com hash, e o registro de emendas |
 | `achados/` | Cada investigação, com o que foi tentado, o que falhou e os dados de apoio |
-| `codigo/` | Módulo de controle de qualidade, notebook de pré-processamento e testes |
+| `codigo/` | Módulo de controle de qualidade, notebooks 03 e 04 e os seus testes |
 | `dados/` | Procedência dos dados e instruções de obtenção. Os dados brutos não estão aqui |
 
 ## A pergunta

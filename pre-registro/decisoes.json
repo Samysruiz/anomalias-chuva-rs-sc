@@ -1,6 +1,6 @@
 {
- "_sobre": "Decisoes pre-registradas em 12/11/2026, antes de treinar qualquer modelo e antes de qualquer avaliacao no conjunto de teste. Os notebooks leem este arquivo; alterar um valor aqui depois desta data deve ser registrado no Quadro de decisoes do relatorio KDD, com data e motivo. VERSAO 1.1, de 12/11/2026: emendas feitas no mesmo dia, antes de qualquer treinamento e sem que existisse qualquer pontuacao de modelo. O arquivo original esta congelado em decisoes_v1.0_original.json, com sha256_16 9e95c5fe56841bf7. Toda emenda esta listada no bloco 'emendas'.",
- "versao": "1.1",
+ "_sobre": "Decisoes pre-registradas em 12/11/2026, antes de treinar qualquer modelo e antes de qualquer avaliacao no conjunto de teste. Os notebooks leem este arquivo; alterar um valor aqui depois desta data deve ser registrado no Quadro de decisoes do relatorio KDD, com data e motivo. VERSAO 1.2, de 13/11/2026: inclui as emendas de 12/11 (todas anteriores a qualquer treinamento) e a emenda de autoria de 13/11. O arquivo original esta congelado em decisoes_v1.0_original.json, com sha256_16 9e95c5fe56841bf7. Toda emenda esta listada no bloco 'emendas'.",
+ "versao": "1.2",
  "data_registro": "2026-11-12",
  "dados": {
   "ufs": [
@@ -177,6 +177,11 @@
    "data": "2026-11-12",
    "item": "sincronizacao",
    "detalhe": "janela de deteccao movida para campo proprio avaliacao.dias_antes_do_inicio"
+  },
+  {
+   "data": "2026-11-13",
+   "item": "autoria",
+   "detalhe": "o trabalho passa a ser registrado como do grupo inteiro (seis integrantes). As etapas ja concluidas permanecem atribuidas a quem as executou, conforme o historico de commits e o Quadro 4 do relatorio."
   }
  ]
 }

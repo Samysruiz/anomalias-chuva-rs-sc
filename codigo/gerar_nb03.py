@@ -269,7 +269,7 @@ HASH_DECISOES = hashlib.sha256(_bytes).hexdigest()[:16]
 # Versões aceitas e os seus hashes. Se o arquivo mudar sem passar por aqui, o notebook para.
 # 1.0 = pré-registro original, congelado em decisoes_v1.0_original.json.
 # 1.1 = emendas de 12/11/2026, todas anteriores a qualquer treinamento (bloco "emendas" do arquivo).
-VERSOES_ACEITAS = {"1.0": "9e95c5fe56841bf7", "1.1": "ecb0a097f983665c"}
+VERSOES_ACEITAS = {"1.0": "9e95c5fe56841bf7", "1.1": "ecb0a097f983665c", "1.2": "d4c58a627755c8f9"}
 assert DEC["versao"] in VERSOES_ACEITAS, (
     f"versão {DEC['versao']} do decisoes.json não reconhecida; registre a emenda antes de seguir")
 if HASH_DECISOES != VERSOES_ACEITAS[DEC["versao"]]:

@@ -6,8 +6,8 @@ registrado mudar, o código quebra em vez de continuar em silêncio.
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 |
-| `sha256` (16 primeiros dígitos) | `9e95c5fe56841bf7` |
+| Versão viva (lida pelo código) | 1.2 — `d4c58a627755c8f9` |
+| Original congelado | 1.0 — `9e95c5fe56841bf7`, em `decisoes_v1.0_original.json` |
 
 Confira o hash antes de confiar em qualquer resultado:
 
@@ -73,11 +73,18 @@ Estendida a exclusão a toda a rede ICEA, e não apenas às estações com resol
 o perfil de disponibilidade do ICEA aponta para horário local, enquanto as demais redes são tratadas
 como UTC. Decisão posterior ao pré-registro, declarada como tal.
 
-### Pendência — janela de detecção ausente do arquivo
+#### 13/11/2026 — Autoria
 
-O `decisoes.json` não contém a janela de detecção de três dias antes do início do evento, que consta
-do texto do pré-registro. Sincronizar o arquivo com o texto, registrando como correção de sincronia,
-não como mudança de parâmetro.
+O trabalho passa a ser registrado como do grupo inteiro: Felipe Fernandes Clivati, Juan Carlos
+Guatierri Alves, Leonardo Secco Silva, Rafael Lazarin Lobo de Almeida, Samara Ruiz Silva e Victor
+Hugo Stein Blauth. As etapas já concluídas permanecem atribuídas a quem as executou, conforme o
+histórico de commits e o Quadro 4 do relatório. Os endereços de e-mail dos integrantes **não** são
+registrados aqui, por serem dado pessoal em repositório público.
+
+## Pendência — janela de detecção ausente do arquivo
+
+Resolvida na v1.1: o campo `avaliacao.dias_antes_do_inicio` passou a existir, com o valor de três
+dias que já constava do texto. Registrada como correção de sincronia, não como mudança de parâmetro.
 
 ## Parâmetros usados que o pré-registro não fixa
 
