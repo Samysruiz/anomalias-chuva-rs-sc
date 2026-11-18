@@ -1,7 +1,7 @@
 # Dados
 
 **Nenhum dado bruto está neste repositório.** O arquivo de treinamento tem centenas de megabytes e
-as ocorrências de avaliação têm condições de uso não verificadas. O `.gitignore` bloqueia os dois.
+as ocorrências de avaliação não têm termos explícitos de licença. O `.gitignore` bloqueia os dois.
 
 ## Chuva, para treinamento: UNIPLU-BR
 
@@ -35,8 +35,8 @@ pré-processamento, não do modelo.
   GeoPackage.
 - O arquivo exportado usa `;` como separador e codificação UTF-8. O notebook procura arquivos cujo
   nome comece por `reindesc` na pasta de dados.
-- **As condições de uso não foram verificadas.** Enquanto isso não for feito, as ocorrências
-  exportadas não são redistribuídas aqui. Em `achados/dados/reindesc_agregados.csv` há apenas
+- **Condições de uso verificadas em 13/11/2026:** acesso público e gratuito, sem termos explícitos de
+  licenciamento na plataforma nem no manual. Por isso as ocorrências exportadas não são redistribuídas aqui. Em `achados/dados/reindesc_agregados.csv` há apenas
   contagens derivadas.
 
 ## Nível e vazão dos rios, camada complementar: HidroWebService da ANA
