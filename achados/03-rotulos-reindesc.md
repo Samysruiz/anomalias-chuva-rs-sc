@@ -11,8 +11,8 @@ A avaliação em nível de evento, que é a prevista, exige construir episódios
 ## O que a exportação contém
 
 Consulta restrita a RS e SC, 2023–2025. Agregados em `dados/reindesc_agregados.csv`. Os 706
-registros brutos **não** são redistribuídos aqui, porque as condições de uso da plataforma não
-foram verificadas.
+registros brutos **não** são redistribuídos aqui, porque a plataforma não traz termos explícitos de
+licenciamento (verificado em 13/11/2026).
 
 - 706 ocorrências: 325 no RS, 381 em SC, de 03/01/2023 a 31/12/2025.
 - Todas de tipologia hidrológica. Nenhuma geológica. A escolha de trabalhar só com hidrológico já
