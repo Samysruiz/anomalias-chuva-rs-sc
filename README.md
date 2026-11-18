@@ -1,52 +1,89 @@
-# Dados
+# Detecção não supervisionada de anomalias de precipitação associadas a cheias no RS e em SC
 
-**Nenhum dado bruto está neste repositório.** O arquivo de treinamento tem centenas de megabytes e
-as ocorrências de avaliação não têm termos explícitos de licença. O `.gitignore` bloqueia os dois.
+Projeto final da disciplina Aprendizado Não Supervisionado, curso de Inteligência Artificial da
+Faculdade Donaduzzi (Toledo, PR). Orientação: Prof. Wagner.
 
-## Chuva, para treinamento: UNIPLU-BR
+**Grupo:** Felipe Fernandes Clivati, Juan Carlos Guatierri Alves, Leonardo Secco Silva,
+Rafael Lazarin Lobo de Almeida, Samara Ruiz Silva e Victor Hugo Stein Blauth.
 
-- Fonte: LEMOS, F. C. et al. *Unified Brazilian Rainfall Dataset (UNIPLU-BR)*. Zenodo, 2026.
-  DOI 10.5281/zenodo.18883358.
-- Licença: CC BY 4.0.
-- O repositório do Zenodo disponibiliza **um único arquivo compactado**, não os arquivos por estado
-  e ano separadamente. Tentar baixar `UF_ANO.zip` direto devolve HTTP 404. O caminho correto é
-  consultar a interface programática do Zenodo, baixar o arquivo único e extrair só os membros de
-  interesse. Cada `UF_ANO.zip` contém `table_info.parquet` (metadados das estações) e
-  `table_data.parquet` (série de precipitação), ligados por `gauge_code`.
-- Recorte usado: RS e SC, 1995–2025. São 118.759.267 registros de 2.132 estações.
-- A coluna do fuso da estação na tabela de metadados chama-se `UTC`, **em maiúsculas**. Código que
-  procure `utc` em minúsculas não a encontra.
+Seleção, pré-processamento, transformação e este registro foram conduzidos por Samara Ruiz Silva
+entre 10 e 13 de novembro de 2026. A modelagem está dividida em quatro frentes independentes que
+partem da mesma entrada — limiar acumulado, PCA, autoencoder e Isolation Forest — e a atribuição
+de cada uma é registrada no histórico de commits à medida que for assumida.
 
-### Aviso dos autores que motiva todo o pré-processamento
+## O que está neste repositório
 
-Os autores declaram que o tratamento aplicado foi apenas de padronização estrutural: não houve
-avaliação qualitativa, verificação de consistência física nem filtragem de valores extremos. Os
-valores estão como reportados pelas agências de origem.
+Este repositório é o registro público e datado do trabalho. Ele existe para que as decisões
+metodológicas possam ser verificadas por terceiros na ordem em que foram tomadas, e para que o
+pré-registro das hipóteses seja auditável.
 
-Para um detector de anomalias isso é decisivo. Falha de instrumento e evento extremo são ambos
-raros, e um modelo de reconstrução pontua os dois igual. Separar defeito de fenômeno é tarefa do
-pré-processamento, não do modelo.
+| Pasta | Conteúdo |
+|---|---|
+| `pre-registro/` | Parâmetros fixados antes de qualquer treinamento, com hash, e o registro de emendas |
+| `achados/` | Cada investigação, com o que foi tentado, o que falhou e os dados de apoio |
+| `codigo/` | Módulo de controle de qualidade, notebooks 03, 04 e 05 e os seus testes |
+| `dados/` | Procedência dos dados e instruções de obtenção. Os dados brutos não estão aqui |
+| `declaracao-uso-de-ia.md` | O que foi assistido por IA, o que foi verificado e por quem |
 
-## Eventos, para avaliação: REInDesC
+Os achados, em ordem:
 
-- Fonte: Cemaden, https://reindesc.cemaden.gov.br
-- Obtenção: no painel de consulta, filtrar por UF (RS e SC) e período (2023–2025), aplicar os
-  filtros e exportar a tabela de ocorrências em CSV. A plataforma também exporta em Excel, KML e
-  GeoPackage.
-- O arquivo exportado usa `;` como separador e codificação UTF-8. O notebook procura arquivos cujo
-  nome comece por `reindesc` na pasta de dados.
-- **Condições de uso verificadas em 13/11/2026:** acesso público e gratuito, sem termos explícitos de
-  licenciamento na plataforma nem no manual. Por isso as ocorrências exportadas não são redistribuídas aqui. Em `achados/dados/reindesc_agregados.csv` há apenas
-  contagens derivadas.
+| Achado | Pergunta | Estado |
+|---|---|---|
+| 01 | Em que base de tempo estão os carimbos? | UTC, com ressalva declarada |
+| 02 | Onde fechar o dia agregado? | 12 h mantido; a confirmação falhou em SC |
+| 03 | O que conta como evento no REInDesC? | episódio por agrupamento, severidade pela fonte |
+| 04 | O que a primeira execução sobre os dados reais mostrou? | 790 estações elegíveis; CEMADEN e ICEA fora |
+| 05 | Por que o teste parece mais chuvoso que a validação? | é clima: a validação contém o ano mais seco de 31 |
+| 06 | O projeto está consistente antes da avaliação? | sim, com duas decisões pendentes e oito correções listadas |
 
-## Nível e vazão dos rios, camada complementar: HidroWebService da ANA
+## A pergunta
 
-Camada independente de validação, usando cota e vazão, que o UNIPLU-BR não contém. O acesso foi
-obtido, mas a rota de inventário devolve HTTP 406 e a documentação pública não especifica os nomes
-exatos dos parâmetros obrigatórios. O projeto é executável sem essa camada.
+Um autoencoder treinado apenas com chuva diária de estações pluviométricas do Rio Grande do Sul
+e de Santa Catarina atribui erro de reconstrução mais alto a janelas que contêm eventos de cheia
+do que a janelas de comportamento habitual? E esse ganho, se existir, vem da não linearidade, ou
+já é obtido por uma referência linear ou por um limiar simples de precipitação acumulada?
 
-## Referência de controle de qualidade
+## O desenho
 
-PINELO, J. *UNIPLU-BR: standardisation, quality control, and database import*. AIR Centre, 2026.
-https://github.com/AIRCentre/UNIPLU-BR — licença MIT. Os limites físicos por resolução e vários
-critérios de qualidade usados aqui vêm desse trabalho, assim como os relatórios citados nos achados.
+Quatro níveis de comparação, do mais simples ao mais elaborado: limiar de precipitação acumulada,
+análise de componentes principais, autoencoder e Isolation Forest. O mesmo particionamento
+temporal, o mesmo pré-processamento e as mesmas cinco sementes para todos.
+
+Os rótulos de evento vêm do REInDesC, do Cemaden, e são usados **somente na avaliação**. Nenhum
+rótulo entra no treinamento.
+
+## Cinco critérios de refutação, fixados de antemão
+
+A hipótese é considerada não corroborada se qualquer um deles ocorrer:
+
+1. o autoencoder não superar a análise de componentes principais de forma consistente nas cinco sementes;
+2. o erro de reconstrução não se elevar nas janelas correspondentes a eventos de cheia;
+3. nenhum modelo superar o limiar de precipitação acumulada;
+4. a variabilidade entre sementes exceder a diferença entre modelos;
+5. o resultado não se reproduzir na replicação restrita ao Hidroweb diário (emenda de 12/11/2026).
+
+Qualquer desses resultados será publicado como resultado.
+
+## Estado
+
+- Notebook 03 (qualidade e preparo): executado nos dados reais em 13/11/2026.
+- Notebook 04 (janelas e modelos): rodada definitiva em 17/11/2026; escores gravados, nenhum comparado com rótulo.
+- Notebook 05 (avaliação): escrito e testado com dados sintéticos; **ainda não executado**. Só roda depois de o
+  grupo registrar a decisão sobre a emenda do limiar (ver achado 06).
+
+A data de entrega é 1 ou 2 de dezembro de 2026.
+
+## Procedência dos dados
+
+- **Treinamento:** UNIPLU-BR (LEMOS et al., 2026), Zenodo, DOI 10.5281/zenodo.18883358, licença CC BY 4.0.
+- **Rótulos de avaliação:** REInDesC, Cemaden, https://reindesc.cemaden.gov.br, acesso em
+  13 nov. 2026. Base descrita em BERNARDES, T. et al., *International Journal of Disaster Risk
+  Reduction*, v. 137, art. 106099, 2026 (acesso aberto). Acesso público e gratuito, **sem termos
+  explícitos de licenciamento**, razão pela qual as ocorrências exportadas não são redistribuídas aqui.
+- **Referência de controle de qualidade:** pipeline do AIR Centre (PINELO, 2026),
+  https://github.com/AIRCentre/UNIPLU-BR, licença MIT.
+
+## Licença
+
+Código em `codigo/` sob licença MIT (ver `LICENSE`). Textos em `achados/` e `pre-registro/` sob
+Creative Commons Atribuição 4.0 Internacional.
