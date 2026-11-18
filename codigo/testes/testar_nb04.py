@@ -12,9 +12,10 @@ import numpy as np
 import pandas as pd
 
 RAIZ = "/tmp/nb04_teste"
-NB = "/home/claude/04_janelas_e_modelos.ipynb"
-DECISOES = "/home/claude/decisoes.json"
-QC = "/home/claude/qc_uniplu.py"
+AQUI = os.path.dirname(os.path.abspath(__file__))
+NB = os.environ.get("NB04", os.path.join(AQUI, "..", "04_janelas_e_modelos.ipynb"))
+DECISOES = os.environ.get("DECISOES", os.path.join(AQUI, "..", "..", "pre-registro", "decisoes.json"))
+QC = os.path.join(AQUI, "..", "qc_uniplu.py")
 
 FALHAS = []
 
@@ -110,9 +111,10 @@ checa("notebook executa sem erro", True)
 
 # ---------------------------------------------------------------- verificar
 SUF = "_demo" if DEMO else ""
-S = pd.read_parquet(f"{RAIZ}/06_dados/escores_04{SUF}.parquet")
+SUB = "/_demo" if DEMO else ""          # versão 3: a demonstração grava em subpastas _demo
+S = pd.read_parquet(f"{RAIZ}/06_dados{SUB}/escores_04{SUF}.parquet")
 S["dia"] = pd.to_datetime(S["dia"])
-log = json.load(open(f"{RAIZ}/05_saidas/04_log_execucao{SUF}.json", encoding="utf-8"))
+log = json.load(open(f"{RAIZ}/05_saidas{SUB}/04_log_execucao{SUF}.json", encoding="utf-8"))
 
 niveis = set(S["modelo"].unique())
 esperados = {"nivel1_acumulado", "nivel2_pca", "nivel3_autoencoder", "nivel4_isolation"}
@@ -143,7 +145,7 @@ checa("PCA retem pelo menos 90% da variancia", log["pca_variancia_explicada"] >=
       f"{log['pca_variancia_explicada']:.3f} com {log['pca_componentes']} componentes")
 
 # checkpoints por epoca e melhor modelo
-ck = os.listdir(f"{RAIZ}/06_dados/_modelos_04")
+ck = os.listdir(f"{RAIZ}/06_dados/_modelos_04{SUB}")
 por_epoca = [f for f in ck if "_epoca" in f]
 melhores = [f for f in ck if f.endswith("_melhor.pt")]
 checa("checkpoint gravado a cada epoca", len(por_epoca) >= 2 * len(esperadas) * 3, f"{len(por_epoca)} arquivos")
@@ -152,7 +154,7 @@ checa("melhor modelo por semente e por gargalo preservado", len(melhores) == 2 *
 gargalos = {f.split("_")[1] for f in melhores}
 checa("dois gargalos treinados", len(gargalos) == 2, sorted(gargalos))
 
-H = pd.read_csv(f"{RAIZ}/05_saidas/04_historico_autoencoder{SUF}.csv")
+H = pd.read_csv(f"{RAIZ}/05_saidas{SUB}/04_historico_autoencoder{SUF}.csv")
 checa("historico tem perda de treino e validacao por epoca",
       {"semente", "epoca", "perda_treino", "perda_validacao"} <= set(H.columns), list(H.columns))
 
@@ -177,12 +179,18 @@ checa("melhor epoca registrada no log", len(log["ae_melhor_epoca"]) == 2 * len(e
 checa("modo registrado no log", log["modo_demonstracao"] == DEMO, log["modo_demonstracao"])
 if DEMO:
     checa("saidas definitivas nao foram sobrescritas",
-          not os.path.exists(f"{RAIZ}/06_dados/escores_04.parquet"))
+          not os.path.exists(f"{RAIZ}/06_dados/escores_04.parquet")
+          and not os.path.exists(f"{RAIZ}/05_saidas/04_log_execucao.json")
+          and not [f for f in os.listdir(f"{RAIZ}/06_dados/_modelos_04") if f.endswith(".pt")])
 
 # normalizacao so do treino: o log tem que registrar a forma usada
 checa("forma da normalizacao registrada", log["normalizacao"] in ("zscore", "log1p_zscore"), log["normalizacao"])
 checa("parametros nao pre-registrados listados no log",
       len(log["parametros_nao_preregistrados"]) >= 8, len(log["parametros_nao_preregistrados"]))
+
+checa("diagnostico do Hidroweb por ano gravado (celula 6b)",
+      os.path.exists(f"{RAIZ}/05_saidas{SUB}/acumulado_mediano_por_ano_hidroweb.csv"))
+checa("versao do notebook registrada como 3", log.get("versao_notebook") == "3", log.get("versao_notebook"))
 
 print()
 print("TODOS PASSARAM" if not FALHAS else f"{len(FALHAS)} FALHARAM: {FALHAS}")
