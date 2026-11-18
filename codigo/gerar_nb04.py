@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Gera o notebook 04 — janelas, normalização e modelos."""
 import json
+import sys
 
 CELLS = []
 
@@ -21,7 +22,9 @@ Projeto final — Aprendizado Não Supervisionado (Wagner). Trabalho do grupo: F
 Clivati, Juan Carlos Guatierri Alves, Leonardo Secco Silva, Rafael Lazarin Lobo de Almeida,
 Samara Ruiz Silva e Victor Hugo Stein Blauth.
 
-**Versão 1, 13/11/2026.** Testado com dados sintéticos; ainda não executado nos dados reais.
+**Versão 3, 18/11/2026.** Inclui as alterações do Felipe: o diagnóstico da chuva acumulada por ano
+no Hidroweb (célula 6b) e as saídas do modo de demonstração em subpastas `_demo`. A rodada real é
+idêntica à versão 2, que rodou em 17/11/2026 e reproduziu exatamente a de 13/11/2026.
 
 Entra com o que o notebook 03 gravou e sai com os **escores de anomalia** por estação e por dia,
 para validação e teste. A transformação de escore em alarme, e o confronto com os eventos, são do
@@ -173,8 +176,15 @@ NAO_PREREGISTRADOS = {
 assert 1 <= AE_GARGALO_SENSIBILIDADE < JANELA, "o gargalo da ablação precisa ser menor que a janela"
 
 SUFIXO = ""
+PASTA_ESCORES = PASTA_DADOS      # onde escores_04.parquet é gravado
 if MODO_DEMONSTRACAO:
     SUFIXO = "_demo"
+    # Saídas da demonstração ficam em subpastas _demo, separadas dos resultados reais.
+    PASTA_SAIDA = os.path.join(PASTA_SAIDA, "_demo")
+    PASTA_MODELOS = os.path.join(PASTA_MODELOS, "_demo")
+    PASTA_ESCORES = os.path.join(PASTA_DADOS, "_demo")
+    for _p in (PASTA_SAIDA, PASTA_MODELOS, PASTA_ESCORES):
+        os.makedirs(_p, exist_ok=True)
     MAX_JANELAS_TREINO = min(MAX_JANELAS_TREINO, 100_000)
     AE_EPOCAS = min(AE_EPOCAS, 10)
     SEMENTES = SEMENTES[:2]
@@ -185,7 +195,7 @@ if MODO_DEMONSTRACAO:
     print("  Rodada rápida, apenas para o grupo ver a comparação entre os modelos funcionando.")
     print("  NÃO use estes números no relatório: o treino é curto, a amostra é menor e são")
     print("  apenas 2 das 5 sementes pré-registradas.")
-    print(f"  Tudo sai com sufixo '{SUFIXO}' e nada definitivo é sobrescrito.")
+    print(f"  Tudo sai com sufixo '{SUFIXO}', nas subpastas _demo, e nada definitivo é sobrescrito.")
     print("  Para a rodada de verdade, mude MODO_DEMONSTRACAO para False e rode de novo.")
     print("=" * 78 + "\n")
 print("decisoes.json versão", DEC["versao"], "| sha256", HASH_DECISOES)
@@ -358,6 +368,32 @@ if EV is not None and len(IDX["teste"][0]):
 est_idx = {g: i for i, g in enumerate(estacoes)}
 idx_hidroweb = np.array([est_idx[g] for g in hidroweb if g in est_idx])
 print(f"\nestações do subconjunto Hidroweb presentes na matriz: {len(idx_hidroweb)}")
+''')
+
+code(r'''
+# 6b. Diagnóstico: mediana da chuva acumulada por ano, só no Hidroweb diário
+mask_hw = np.zeros(len(estacoes), dtype=bool)
+mask_hw[idx_hidroweb] = True
+
+Af = np.nan_to_num(A, nan=0.0)
+C = np.cumsum(Af, axis=0, dtype="float64")
+zero = np.zeros((1, A.shape[1]), dtype="float64")
+acum = (C[JANELA - 1:] - np.vstack([zero, C[:-JANELA]])).astype("float32")
+
+ok = valida & mask_hw[None, :]
+anos_rot = pd.DatetimeIndex(dias_rotulo).year
+
+linhas = []
+for ano in np.unique(anos_rot):
+    sel = (anos_rot == ano)[:, None] & ok
+    v = acum[sel]
+    if v.size:
+        linhas.append({"ano": int(ano), "janelas": int(v.size),
+                       "mediana_mm": round(float(np.median(v)), 1),
+                       "p90_mm": round(float(np.percentile(v, 90)), 1)})
+DIAG = pd.DataFrame(linhas)
+print(DIAG.to_string(index=False))
+DIAG.to_csv(os.path.join(PASTA_SAIDA, "acumulado_mediano_por_ano_hidroweb.csv"), index=False)
 ''')
 
 md("""
@@ -545,7 +581,7 @@ for (modelo, semente), d in ESCORES.items():
 S = pd.concat(partes, ignore_index=True)
 S["no_hidroweb"] = S["gauge_code"].isin(hidroweb)
 
-arq = os.path.join(PASTA_DADOS, f"escores_04{SUFIXO}.parquet")
+arq = os.path.join(PASTA_ESCORES, f"escores_04{SUFIXO}.parquet")
 S.to_parquet(arq, index=False)
 HIST_AE.to_csv(os.path.join(PASTA_SAIDA, f"04_historico_autoencoder{SUFIXO}.csv"), index=False)
 AUD_JAN.to_csv(os.path.join(PASTA_SAIDA, f"04_auditoria_janelas{SUFIXO}.csv"), index=False)
@@ -557,7 +593,7 @@ print(f"{len(S):,} linhas de escore gravadas em {arq}")
 print(S.groupby(["modelo", "conjunto"])["escore"].agg(["size", "median"]).to_string())
 
 log = {
-    "notebook": "04_janelas_e_modelos", "versao_notebook": "2",
+    "notebook": "04_janelas_e_modelos", "versao_notebook": "3",
     "modo_demonstracao": MODO_DEMONSTRACAO,
     "data_execucao": pd.Timestamp.now().isoformat(),
     "decisoes_versao": DEC["versao"], "decisoes_sha256_16": HASH_DECISOES,
@@ -614,6 +650,8 @@ def nb():
 
 
 if __name__ == "__main__":
-    with open("/home/claude/04_janelas_e_modelos.ipynb", "w", encoding="utf-8") as f:
+    import os
+    destino = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "04_janelas_e_modelos.ipynb")
+    with open(destino, "w", encoding="utf-8") as f:
         json.dump(nb(), f, ensure_ascii=False, indent=1)
-    print("ok", len(CELLS), "celulas")
+    print("ok", len(CELLS), "celulas ->", destino)
