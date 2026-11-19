@@ -35,6 +35,7 @@ Os achados, em ordem:
 | 04 | O que a primeira execução sobre os dados reais mostrou? | 790 estações elegíveis; CEMADEN e ICEA fora |
 | 05 | Por que o teste parece mais chuvoso que a validação? | é clima: a validação contém o ano mais seco de 31 |
 | 06 | O projeto está consistente antes da avaliação? | sim, com duas decisões pendentes e oito correções listadas |
+| 07 | O carimbo do UNIPLU-BR está mesmo em UTC? | sim: pico de correlação com a NOAA em 0 h, em 117 pares |
 
 ## A pergunta
 
