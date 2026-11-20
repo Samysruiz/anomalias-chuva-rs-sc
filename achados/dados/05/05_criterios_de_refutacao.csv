@@ -1,0 +1,6 @@
+criterio,1%,3%,PR-AUC,veredito
+o autoencoder não supera o PCA de forma consistente nas 5 sementes,True,True,True,REFUTA
+o escore do autoencoder não se eleva nos dias dos eventos do teste,False,False,False,não refuta
+nenhum modelo supera o limiar de chuva acumulada,True,False,False,inconclusivo
+a variabilidade entre sementes excede a diferença AE − PCA,False,True,False,inconclusivo
+o resultado não se reproduz só com o Hidroweb diário,False,True,True,inconclusivo

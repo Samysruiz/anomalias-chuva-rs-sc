@@ -18,3 +18,10 @@ Contagens de estações por ano e rede. Não contêm dado bruto de chuva nem dad
   elegíveis". O resto da imagem é o gráfico original do notebook.
 - Estas figuras são derivadas das contagens do pré-processamento. Se o notebook for reexecutado,
   elas devem ser regeneradas pelo código, não editadas.
+
+## Figuras da avaliação (notebook 05, 20/11/2026)
+
+| Arquivo | Conteúdo |
+|---|---|
+| `05_recall_por_modelo.png` | Recall dos 37 episódios severos por modelo, a 1% e a 3% dos dias, média ± desvio nas sementes (achado 08) |
+| `05_serie_alarmes_teste.png` | Fração diária de estações acima do limiar no teste, RS e SC, limiar de chuva e autoencoder, com as janelas de detecção dos episódios severos (achado 08) |

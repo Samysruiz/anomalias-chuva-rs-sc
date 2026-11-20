@@ -1,0 +1,11 @@
+metrica,valor
+"Spearman(escore nivel2_pca, chuva acumulada)",0.736247160378745
+"Spearman(escore nivel3_autoencoder, chuva acumulada)",0.7177108528981319
+"Spearman(escore nivel3_autoencoder_gargalo3, chuva acumulada)",0.8874042276591473
+"Spearman(escore nivel4_isolation, chuva acumulada)",0.9718957686783565
+"sobreposição do 1% mais anômalo, nivel3_autoencoder × nivel2_pca (Jaccard)",0.2626173189304055
+"sobreposição do 1% mais anômalo, nivel3_autoencoder × nivel1_acumulado (Jaccard)",0.13138686131386862
+"sobreposição do 1% mais anômalo, nivel2_pca × nivel1_acumulado (Jaccard)",0.15709185329438494
+"sobreposição do 1% mais anômalo, nivel4_isolation × nivel1_acumulado (Jaccard)",0.46466721446179127
+"sobreposição do 1% mais anômalo, nivel3_autoencoder × nivel4_isolation (Jaccard)",0.12106918238993711
+"Spearman(autoencoder, PCA)",0.7553608291070082

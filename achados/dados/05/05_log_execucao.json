@@ -1,0 +1,63 @@
+{
+  "notebook": "05_avaliacao",
+  "versao_notebook": "1",
+  "data_execucao": "2026-11-20T22:45:19.054524",
+  "decisoes_versao": "1.2",
+  "decisoes_sha256_16": "d4c58a627755c8f9",
+  "emenda_limiar": "rejeitada",
+  "data_decisao_grupo": "2026-11-20",
+  "escores_04_execucao": "2026-11-17T19:21:02.959478",
+  "auditoria_falhas": [],
+  "criterios": [
+    {
+      "criterio": "o autoencoder não supera o PCA de forma consistente nas 5 sementes",
+      "1%": true,
+      "3%": true,
+      "PR-AUC": true,
+      "veredito": "REFUTA"
+    },
+    {
+      "criterio": "o escore do autoencoder não se eleva nos dias dos eventos do teste",
+      "1%": false,
+      "3%": false,
+      "PR-AUC": false,
+      "veredito": "não refuta"
+    },
+    {
+      "criterio": "nenhum modelo supera o limiar de chuva acumulada",
+      "1%": true,
+      "3%": false,
+      "PR-AUC": false,
+      "veredito": "inconclusivo"
+    },
+    {
+      "criterio": "a variabilidade entre sementes excede a diferença AE − PCA",
+      "1%": false,
+      "3%": true,
+      "PR-AUC": false,
+      "veredito": "inconclusivo"
+    },
+    {
+      "criterio": "o resultado não se reproduz só com o Hidroweb diário",
+      "1%": false,
+      "3%": true,
+      "PR-AUC": true,
+      "veredito": "inconclusivo"
+    }
+  ],
+  "parametros_nao_preregistrados": {
+    "janelas mínimas de validação para a estação ter limiar": 100,
+    "f calibrado separadamente por UF": true,
+    "'acima do limiar' = escore estritamente maior que o limiar": true,
+    "'atinge f' = fração maior ou igual a f, com f > 0": true,
+    "dias sem estação ativa na UF ficam fora do denominador da taxa de alarme": true,
+    "alarme falso = dia de alarme fora da janela de detecção de todos os 121 episódios da UF": true,
+    "antecedência = início do episódio menos o primeiro dia de alarme na janela (dias)": true,
+    "PR-AUC diária: escore do dia = fração de estações acima do limiar P99; positivo = dia na janela de um episódio severo": true,
+    "métrica que decide os critérios 1, 3, 4 e 5 = recall do conjunto principal no ponto de 1%": true,
+    "critério 2 = AUC (Mann-Whitney) do escore estação-dia, dias de episódio severo contra os demais, unilateral 5%": true,
+    "limiar do nível 1 no conjunto principal": "treino"
+  },
+  "pandas": "2.2.3",
+  "python": "3.13.18"
+}

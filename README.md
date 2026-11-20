@@ -7,9 +7,7 @@ Faculdade Donaduzzi (Toledo, PR). Orientação: Prof. Wagner.
 Rafael Lazarin Lobo de Almeida, Samara Ruiz Silva e Victor Hugo Stein Blauth.
 
 Seleção, pré-processamento, transformação e este registro foram conduzidos por Samara Ruiz Silva
-entre 10 e 13 de novembro de 2026. A modelagem está dividida em quatro frentes independentes que
-partem da mesma entrada — limiar acumulado, PCA, autoencoder e Isolation Forest — e a atribuição
-de cada uma é registrada no histórico de commits à medida que for assumida.
+entre 10 e 20 de novembro de 2026. O treinamento dos modelos ficou a cargo de Felipe Fernandes Clivati.
 
 ## O que está neste repositório
 
@@ -29,13 +27,14 @@ Os achados, em ordem:
 
 | Achado | Pergunta | Estado |
 |---|---|---|
-| 01 | Em que base de tempo estão os carimbos? | UTC, com ressalva declarada |
+| 01 | Em que base de tempo estão os carimbos? | UTC, com ressalva declarada (resolvida no achado 07) |
 | 02 | Onde fechar o dia agregado? | 12 h mantido; a confirmação falhou em SC |
 | 03 | O que conta como evento no REInDesC? | episódio por agrupamento, severidade pela fonte |
 | 04 | O que a primeira execução sobre os dados reais mostrou? | 790 estações elegíveis; CEMADEN e ICEA fora |
 | 05 | Por que o teste parece mais chuvoso que a validação? | é clima: a validação contém o ano mais seco de 31 |
 | 06 | O projeto está consistente antes da avaliação? | sim, com duas decisões pendentes e oito correções listadas |
 | 07 | O carimbo do UNIPLU-BR está mesmo em UTC? | sim: pico de correlação com a NOAA em 0 h, em 117 pares |
+| 08 | O autoencoder detecta as cheias melhor que as referências? | não: hipótese não corroborada (critério 1); o limiar simples lidera a 1% |
 
 ## A pergunta
 
@@ -68,9 +67,18 @@ Qualquer desses resultados será publicado como resultado.
 ## Estado
 
 - Notebook 03 (qualidade e preparo): executado nos dados reais em 13/11/2026.
-- Notebook 04 (janelas e modelos): rodada definitiva em 17/11/2026; escores gravados, nenhum comparado com rótulo.
-- Notebook 05 (avaliação): escrito e testado com dados sintéticos; **ainda não executado**. Só roda depois de o
-  grupo registrar a decisão sobre a emenda do limiar (ver achado 06).
+- Notebook 03b (verificação de fuso com a NOAA): executado em 19/11/2026; UTC confirmado.
+- Notebook 04 (janelas e modelos): rodada definitiva em 17/11/2026; escores gravados e travados.
+- Notebook 05 (avaliação): executado em 20/11/2026, com a emenda do limiar rejeitada e o nível 1 calibrado
+  no treino, decisões registradas pelo grupo antes da execução. Auditoria com 0 falhas.
+
+## Resultado
+
+**A hipótese não foi corroborada.** O critério 1 ocorreu nas três leituras: o autoencoder não supera o PCA de
+forma consistente nas cinco sementes. Com alarme em 1% dos dias, o limiar simples de chuva acumulada detectou
+32,4% dos 37 episódios severos; o autoencoder principal, 21,1% ± 4,4; o PCA, 16,2%. O escore sobe nos dias de
+cheia em todos os modelos (AUC de 0,64 a 0,76), mas os modelos que mais detectam são os que mais se aproximam
+da chuva acumulada. Detalhes, sensibilidades e limites no achado 08.
 
 A data de entrega é 1 ou 2 de dezembro de 2026.
 
