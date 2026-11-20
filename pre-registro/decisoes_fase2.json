@@ -1,0 +1,56 @@
+{
+  "versao": "1.0",
+  "data_registro": "2026-11-20",
+  "aprovado_por": "grupo",
+  "natureza": "exploratoria: o periodo de teste 2023-2025 ja foi visto na fase 1",
+  "base": {"arquivo": "decisoes.json", "versao": "1.2", "sha256_16": "d4c58a627755c8f9"},
+  "escopo": "versao minima: entradas E0 e E1; E2 (umidade do solo) e E3 (cota da ANA) nao fazem parte",
+  "data_limite": "2026-11-26",
+  "pergunta": "Dar ao autoencoder a chuva media das estacoes vizinhas faz com que ele supere o limiar de chuva acumulada na deteccao dos episodios severos?",
+  "entradas": {
+    "E0": "janela de 15 dias da chuva diaria da propria estacao",
+    "E1": "E0 concatenada com a janela de 15 dias da chuva media das estacoes elegiveis vizinhas"
+  },
+  "vizinhanca": {"raio_km": 50.0, "minimo_vizinhas_com_dado_no_dia": 2, "exclui_a_propria_estacao": true, "so_estacoes_elegiveis": true},
+  "janelas": {
+    "regras": "as mesmas da fase 1: 15 dias, passo 1, causal, janela completa, particao e intervalo de 15 dias iguais",
+    "mesmo_conjunto_para_E0_e_E1": "todas as comparacoes usam so as janelas completas em E1"
+  },
+  "normalizacao": "escore padronizado por estacao, media e desvio do treino, calculado separadamente para a chuva propria e para a media das vizinhas",
+  "teto_janelas_treino": 500000,
+  "semente_amostra_treino": 0,
+  "ajuste_autoencoder": {
+    "grade": {"gargalo": ["3", "8", "igual_ao_pca"], "taxa_aprendizado": [0.001, 0.0003]},
+    "lote": 1024,
+    "epocas_maximas": 300,
+    "paciencia": 30,
+    "semente_do_ajuste": 0,
+    "checkpoint": "a cada epoca, com o melhor modelo pela perda de validacao",
+    "criterio_de_escolha": "maior PR-AUC diaria na validacao 2020-2022, com os rotulos do REInDesC 2020-2022",
+    "mesma_grade_para_E0_e_E1": true
+  },
+  "rotulos_validacao": {
+    "arquivos": "06_dados/validacao_reindesc*.csv (nome sem comecar por reindesc, para nao entrar no notebook 03)",
+    "periodo": ["2020-01-01", "2022-12-31"],
+    "regra_de_episodio": "igual a fase 1: mesma UF, intervalo de ate 2 dias; severo com ao menos uma ocorrencia GP ou MP; janela de deteccao de 3 dias antes do inicio ate o fim"
+  },
+  "modelos_finais": {
+    "sementes": [0, 1, 2, 3, 4],
+    "autoencoder": "configuracao escolhida no ajuste, por entrada",
+    "pca": "componentes que explicam 90% da variancia no treino, por entrada",
+    "isolation_forest": {"arvores": 200, "amostra": 256},
+    "limiar_de_referencia": "chuva acumulada na janela da propria estacao, com limiar P99 por estacao no treino, como na fase 1"
+  },
+  "alarme": "igual a fase 1: limiar P99 por estacao na validacao (nivel 1: no treino); fracao regional f por UF calibrada na validacao para 1% e 3% dos dias",
+  "sucesso": [
+    "S1: em cada uma das 5 sementes, o autoencoder E1 supera o limiar de chuva acumulada em recall dos episodios severos a 1% dos dias e em PR-AUC diaria",
+    "S2: em cada uma das 5 sementes, o autoencoder E1 supera o autoencoder E0 nas mesmas duas medidas"
+  ],
+  "leitura": [
+    "S1 e S2: a vizinhanca ajudou o autoencoder",
+    "S2 sem S1: a vizinhanca ajudou, mas nao o bastante para superar a soma de chuva",
+    "PCA e Isolation Forest tambem melhoram de E0 para E1: o ganho e da fonte nova, nao da nao linearidade",
+    "o ganho nao se repete so no Hidroweb diario: atribuido a mistura de redes"
+  ],
+  "refutacao": "nenhum dos itens S1 e S2 ocorre: a chuva das vizinhas, nesta forma, nao ajudou o autoencoder"
+}

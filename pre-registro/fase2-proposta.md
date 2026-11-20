@@ -1,10 +1,10 @@
-# Fase 2 — proposta de pré-registro (rascunho para aprovação do grupo)
+# Fase 2 — proposta de pré-registro (versão mínima aprovada em 20/11/2026)
 
-**Situação em 20/11/2026: proposta, não aprovada e não executada.** Na avaliação feita no mesmo dia, a
-recomendação foi não executar a fase 2 completa antes da entrega (1 ou 2/12/2026), pelo risco de prazo (erro 406 da
-ANA, download grande do ERA5-Land, dezenas de treinos) e por ela só poder produzir resultado exploratório. A
-alternativa registrada é uma versão mínima opcional, só com a entrada E1, com data-limite de 26/11/2026, ou a fase 2
-completa depois da entrega, com um período de teste ainda não visto. A decisão é do grupo.
+**Situação em 20/11/2026: o grupo aprovou a versão mínima** (só as entradas E0 e E1), registrada em
+`decisoes_fase2.json` v1.0, antes de qualquer ajuste ou treino. As entradas E2 (umidade do solo) e E3 (cota da ANA)
+ficam fora e passam a trabalho futuro. Data-limite: 26/11/2026; se não fechar até lá, a fase 2 sai da entrega.
+Na avaliação do mesmo dia, a recomendação tinha sido não executar a fase 2 completa antes da entrega, pelo risco de
+prazo e por ela só poder produzir resultado exploratório.
 
 **Origem:** rascunho de 20/11/2026, escrito **depois** do resultado da fase 1 (achado 08) e **antes** de qualquer
 ajuste ou dado novo. Só vale depois de aprovado pelo grupo, com data, e convertido em `decisoes_fase2.json` com
