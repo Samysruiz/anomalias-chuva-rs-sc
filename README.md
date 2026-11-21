@@ -35,6 +35,7 @@ Os achados, em ordem:
 | 06 | O projeto está consistente antes da avaliação? | sim, com duas decisões pendentes e oito correções listadas |
 | 07 | O carimbo do UNIPLU-BR está mesmo em UTC? | sim: pico de correlação com a NOAA em 0 h, em 117 pares |
 | 08 | O autoencoder detecta as cheias melhor que as referências? | não: hipótese não corroborada (critério 1); o limiar simples lidera a 1% |
+| 09 | (Exploratório) A chuva das vizinhas ajuda o autoencoder? | não (S1 e S2 não ocorrem); o PCA com a vizinhança melhora, mas alarmando o dobro no teste |
 
 ## A pergunta
 
@@ -69,6 +70,7 @@ Qualquer desses resultados será publicado como resultado.
 - Notebook 03 (qualidade e preparo): executado nos dados reais em 13/11/2026.
 - Notebook 03b (verificação de fuso com a NOAA): executado em 19/11/2026; UTC confirmado.
 - Notebook 04 (janelas e modelos): rodada definitiva em 17/11/2026; escores gravados e travados.
+- Notebook 06 (fase 2, exploratória, versão mínima): executado em 21/11/2026; resultado no achado 09.
 - Notebook 05 (avaliação): executado em 20/11/2026, com a emenda do limiar rejeitada e o nível 1 calibrado
   no treino, decisões registradas pelo grupo antes da execução. Auditoria com 0 falhas.
 

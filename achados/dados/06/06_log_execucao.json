@@ -1,0 +1,71 @@
+{
+  "notebook": "06_fase2_vizinhanca",
+  "versao_notebook": "1",
+  "data_execucao": "2026-11-21T02:41:13.934320",
+  "decisoes_fase1": {
+    "versao": "1.2",
+    "sha256_16": "d4c58a627755c8f9"
+  },
+  "decisoes_fase2": {
+    "versao": "1.0",
+    "sha256_16": "c0e7df1aded21cd7"
+  },
+  "natureza": "exploratoria: o periodo de teste 2023-2025 ja foi visto na fase 1",
+  "janelas": {
+    "treino": 500000,
+    "validacao": 435935,
+    "teste": 343986
+  },
+  "episodios_severos": {
+    "validacao": 16,
+    "teste": 37
+  },
+  "pca_componentes": {
+    "E0": 13,
+    "E1": 15
+  },
+  "escolha_ajuste": {
+    "E0": {
+      "gargalo": 3,
+      "lr": 0.001
+    },
+    "E1": {
+      "gargalo": 3,
+      "lr": 0.0003
+    }
+  },
+  "vereditos": {
+    "todas": {
+      "S1": false,
+      "S2": false,
+      "ganho_E1_menos_E0_outros_modelos": {
+        "pca recall_1%": 0.432,
+        "pca pr_auc": 0.116,
+        "isolation_forest recall_1%": 0.0,
+        "isolation_forest pr_auc": -0.009
+      }
+    },
+    "hidroweb": {
+      "S1": false,
+      "S2": false,
+      "ganho_E1_menos_E0_outros_modelos": {
+        "pca recall_1%": 0.162,
+        "pca pr_auc": 0.118,
+        "isolation_forest recall_1%": -0.011,
+        "isolation_forest pr_auc": -0.011
+      }
+    }
+  },
+  "leitura": "Nem S1 nem S2: a chuva das vizinhas, nesta forma, não ajudou o autoencoder (refutação pré-registrada).",
+  "nao_preregistrados": {
+    "arquitetura do autoencoder": "entrada → (entrada+gargalo)//2 → gargalo → (entrada+gargalo)//2 → entrada, ReLU entre camadas, como na fase 1",
+    "mínimo de janelas de validação para a estação ter limiar": 100,
+    "f calibrado por UF": true,
+    "piso do desvio na normalização": 1e-06,
+    "reaproveitamento de treinos já terminados quando o notebook é rodado de novo": true
+  },
+  "epocas_maximas_usadas": 300,
+  "teto_janelas_treino_usado": 500000,
+  "python": "3.13.16",
+  "pandas": "2.2.3"
+}
