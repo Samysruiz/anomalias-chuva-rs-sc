@@ -205,7 +205,7 @@ arqs_val = sorted(glob.glob(os.path.join(PASTA_DADOS, "validacao_reindesc*.csv")
 if not arqs_val:
     raise SystemExit("faltam os rótulos da validação: exporte do REInDesC as ocorrências de RS e SC de "
                      "2020 a 2022 e grave em 06_dados/ como validacao_reindesc_2020_2022.csv")
-OCV = pd.concat([pd.read_csv(a, sep=";", encoding="utf-8") for a in arqs_val], ignore_index=True)
+OCV = pd.concat([pd.read_csv(a, sep=";", encoding="utf-8-sig") for a in arqs_val], ignore_index=True)   # a exportação vem com BOM
 OCV.columns = [c.strip() for c in OCV.columns]
 OCV["Data"] = pd.to_datetime(OCV["Data"])
 OCV = OCV.drop_duplicates("ID ocorrência")

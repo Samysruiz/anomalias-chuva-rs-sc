@@ -90,7 +90,7 @@ def monta_dados():
             n += 1
             oc.append({"ID ocorrência": n, "Data": d.strftime("%Y-%m-%d"), "UF": uf, "Município": f"M{n}",
                        "Magnitude": "GP" if n % 2 else "MP", "Tipologia": "Hidrológico"})
-    pd.DataFrame(oc).to_csv(f"{RAIZ}/06_dados/validacao_reindesc_2020_2022.csv", sep=";", index=False, encoding="utf-8")
+    pd.DataFrame(oc).to_csv(f"{RAIZ}/06_dados/validacao_reindesc_2020_2022.csv", sep=";", index=False, encoding="utf-8-sig")  # com BOM, como a exportação real
     return D, EST, ALVO
 
 
