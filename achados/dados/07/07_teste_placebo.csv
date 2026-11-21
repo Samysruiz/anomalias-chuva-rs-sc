@@ -1,0 +1,5 @@
+estatistica,observado_pct,placebo_mediana_pct,placebo_p95_pct,razao_obs_mediana,p_valor
+T_indisp,26.5724,20.3545,23.9181,1.3055,0.005
+T_travado,0.0094,0.0508,0.0938,0.1844,0.994
+T_sem_janela,53.5666,42.9953,45.9704,1.2459,0.001
+T_sem_leitura,20.5800,16.8357,20.4383,1.2224,0.047

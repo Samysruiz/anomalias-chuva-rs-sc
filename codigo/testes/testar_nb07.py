@@ -38,7 +38,7 @@ def monta(raiz, cenario):
     for i in range(8):
         uf = "RS" if i < 4 else "SC"
         est.append({"gauge_code": f"{uf}{i}", "state": uf, "lat": -29.5 + 0.1 * i if uf == "RS" else -27.0 + 0.1 * i,
-                    "long": -53.0 + 0.1 * i, "time_step": 60, "network": "ANA" if i % 2 else "INMET",
+                    "long": -53.0 + 0.1 * i, "time_step": 60, "network": "CEMADEN" if i == 0 else ("ANA" if i % 2 else "INMET"),
                     "city": "x", "elevation": 1.0, "responsible": "x", "utc": True})
     info = pd.DataFrame(est)
     # episódios: 4 severos no RS, 2 no SC, alguns não severos
@@ -156,6 +156,12 @@ def main():
                   f"p = {res.loc['T_indisp', 'p_valor']:.3f}")
             checa("A: placebo acusa o travamento (p < 0,05)", res.loc["T_travado", "p_valor"] < 0.05,
                   f"p = {res.loc['T_travado', 'p_valor']:.3f}")
+            sen = pd.read_csv(f"{raiz}/05_saidas/07_sensibilidades.csv")
+            s2 = sen[sen["sensibilidade"] == "S2_cemaden_teste_todo"]
+            checa("A: S2 acusa o travamento do Cemaden nos episódios", len(s2) == 1 and float(s2["p_valor"].iloc[0]) < 0.05,
+                  str(s2[["observado_pct", "p_valor"]].to_dict("records")))
+            s1 = sen[sen["sensibilidade"].str.startswith("S1") & (sen["estatistica"] == "T_indisp")]
+            checa("A: S1 roda e acusa", len(s1) == 1 and float(s1["p_valor"].iloc[0]) < 0.05, str(s1["p_valor"].tolist()))
             checa("A: estações sem falha não travam", int(pe.drop(index=["RS0"])["n_trav"].sum()) == 0)
             # retomada: lotes prontos não são refeitos
             p2, dt2 = roda(raiz)

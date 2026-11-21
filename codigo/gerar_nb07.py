@@ -516,6 +516,82 @@ print("LEITURA:", LEITURA)
 print("Arquivos em 05_saidas: 07_*.csv, 07_*.png e 07_log_execucao.json")
 ''')
 
+md("""
+## Sensibilidades — NÃO pré-registradas
+
+Decididas em 21/11/2026, **depois** de ver o resultado da célula 8. Por isso não substituem o teste
+pré-registrado; servem para saber se ele está contaminado.
+
+- **S1, corte no fim da série.** A série Hidroweb diário do UNIPLU-BR termina em 30/09/2025 (é a maior
+  rede entre as elegíveis). Depois disso a indisponibilidade salta por falta de dado na base, não por
+  falha de aparelho, e vários episódios severos caem nesse trecho. S1 refaz o mesmo teste só até o corte.
+- **S2, a rede do Cemaden.** Quase todo o travamento está nela, mas ela não é elegível, então ficou fora
+  do teste pré-registrado. S2 pergunta se as estações do Cemaden travam mais nos episódios severos:
+  leituras travadas ou oscilando, sobre as estação-dias com leitura.
+""")
+
+code(r"""
+# 11. Sensibilidades S1 e S2 (não pré-registradas)
+D1C = pd.Timestamp(os.environ.get("NB07_CORTE", "2025-09-30"))
+
+def placebo(janelas, NUM, DEN, fim, n=N_SORTEIOS, semente=SEMENTE):
+    rng = np.random.default_rng(semente)
+    def est(m):
+        num = sum(NUM[u][m[u]].sum() for u in UFS)
+        den = sum(DEN[u][m[u]].sum() for u in UFS)
+        return num / den if den else np.nan
+    obs = est(mascara(janelas))
+    vals = []
+    for _ in range(n):
+        jan = []
+        for u, a, b in janelas:
+            for _t in range(200):
+                s = pd.Timedelta(days=int(rng.choice(offsets)))
+                a2, b2 = a + s, b + s
+                if a2 < D0 or b2 > fim or OCUP[u][pos[a2]:pos[b2] + 1].any():
+                    continue
+                jan.append((u, a2, b2)); break
+        vals.append(est(mascara(jan)))
+    vals = np.array(vals, dtype=float)
+    ok = ~np.isnan(vals)
+    p = (1 + (vals[ok] >= obs).sum()) / (1 + ok.sum()) if ok.any() and not np.isnan(obs) else np.nan
+    return obs, vals, p
+
+linhas = []
+J1 = [(u, a, b) for (u, a, b) in JAN_OBS if b <= D1C]
+DEN_E = {u: np.full(len(DIAS_T), N_U[u], dtype=float) for u in UFS}
+print(f"S1: episódios severos até {D1C.date()}: {len(J1)} de {len(JAN_OBS)}")
+for k in MATS:
+    o, v, p = placebo(J1, SOMA[k], DEN_E, D1C)
+    linhas.append({"sensibilidade": "S1_corte_" + str(D1C.date()), "estatistica": k, "observado_pct": 100 * o,
+                   "placebo_mediana_pct": 100 * np.nanmedian(v), "placebo_p95_pct": 100 * np.nanpercentile(v, 95),
+                   "p_valor": p})
+
+C = DIAS[(DIAS["network"] == "CEMADEN") & (DIAS["dia"] >= D0) & (DIAS["dia"] <= D1) & (DIAS["n_leit"] > 0)]
+if len(C):
+    g = C.groupby(["state", "dia"]).agg(n=("gauge_code", "size"), t=("trav_osc", "sum")).reset_index()
+    NUMC = {u: np.zeros(len(DIAS_T)) for u in UFS}
+    DENC = {u: np.zeros(len(DIAS_T)) for u in UFS}
+    for u in UFS:
+        gu = g[g["state"] == u]
+        ii = ix_d.get_indexer(gu["dia"])
+        NUMC[u][ii[ii >= 0]] = gu["t"].to_numpy()[ii >= 0]
+        DENC[u][ii[ii >= 0]] = gu["n"].to_numpy()[ii >= 0]
+    print(f"S2: estações do Cemaden com leitura no teste: {C['gauge_code'].nunique()}")
+    for nome, jan, fim in (("S2_cemaden_teste_todo", JAN_OBS, D1), ("S2_cemaden_ate_corte", J1, D1C)):
+        o, v, p = placebo(jan, NUMC, DENC, fim)
+        linhas.append({"sensibilidade": nome, "estatistica": "travado_ou_oscilando", "observado_pct": 100 * o,
+                       "placebo_mediana_pct": 100 * np.nanmedian(v), "placebo_p95_pct": 100 * np.nanpercentile(v, 95),
+                       "p_valor": p})
+else:
+    print("S2: nenhuma estação do Cemaden com leitura no teste; S2 não se aplica.")
+SENS = pd.DataFrame(linhas)
+SENS.to_csv(os.path.join(PASTA_SAIDA, "07_sensibilidades.csv"), index=False)
+print("=" * 70)
+print("SENSIBILIDADES (NÃO pré-registradas) — MANDE AO CLAUDE")
+print(SENS.round(4).to_string(index=False))
+""")
+
 NB = {"cells": CELLS, "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
                                    "language_info": {"name": "python"}}, "nbformat": 4, "nbformat_minor": 5}
 destino = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)),
