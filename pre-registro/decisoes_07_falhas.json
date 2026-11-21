@@ -1,0 +1,49 @@
+{
+  "versao": "1.0",
+  "data": "2026-11-21",
+  "registrado_por": "grupo",
+  "natureza": "exploratória e descritiva; não altera o resultado pré-registrado da fase 1 (achado 08) nem o da fase 2 (achado 09)",
+  "pergunta": "Os pluviômetros ficam indisponíveis (sem leitura, com leitura travada ou com dia descartado pelo controle de qualidade) com mais frequência justamente durante as cheias severas?",
+  "por_que_importa": "Se a falha se concentra nas cheias, o sistema perde o sinal quando ele mais importa, e nenhum modelo, simples ou complexo, consegue alarmar numa estação sem dado.",
+  "dados": {
+    "leituras": "06_dados/chuva_rs_sc_bruto.parquet, resolução original, 1995-2025",
+    "dia_valido": "06_dados/chuva_diaria_qc_h12.parquet: dia válido = linha presente com qc_limpo_diario verdadeiro",
+    "estacoes_elegiveis": "06_dados/estacoes_elegiveis.parquet (as 790 da fase 1)",
+    "episodios": "06_dados/eventos_reindesc.parquet, episódios severos do teste (37), janela de janela_inicio a data_fim, por UF"
+  },
+  "fronteira_do_dia": "a mesma do notebook 03: passo, deslocamento e intervalo fechado lidos de decisoes.json",
+  "marcas_nativas_por_dia": ["qc_travado (24 leituras iguais não nulas)", "qc_oscilacao_rapida", "qc_acima_limite_fisico", "qc_duplicata (conflitante)"],
+  "definicoes": {
+    "indisponivel": "dia de estação elegível, no período de teste, sem dia válido",
+    "componentes": {
+      "sem_leitura": "nenhuma leitura no dia",
+      "travado_ou_oscilando": "ao menos uma leitura do dia marcada como travada ou oscilando no nível original, ou dia marcado travado no nível diário",
+      "outro": "indisponível por outro motivo (cobertura abaixo de 90%, limite físico, duplicata, critérios espaciais)"
+    },
+    "sem_janela": "dia de estação elegível em que a janela de 15 dias que termina nele não está completa"
+  },
+  "estatisticas": {
+    "T_indisp": "fração de (estação elegível da UF × dia dentro de janela de episódio severo) que está indisponível",
+    "T_travado": "mesma fração, só para travado_ou_oscilando",
+    "T_sem_janela": "mesma fração, para sem_janela"
+  },
+  "teste_placebo": {
+    "sorteios": 1000,
+    "semente": 0,
+    "regra": "cada episódio severo é deslocado por um número inteiro de dias s, sorteado em [-365, 365] com |s| >= 30, mantendo a janela inteira dentro do teste (2023-01-15 a 2025-12-31) e sem sobrepor nenhuma janela de episódio (severo ou não) da mesma UF; até 200 tentativas por episódio, depois disso o episódio fica fora daquele sorteio",
+    "p_valor": "(1 + número de sorteios com estatística >= observada) / (1 + sorteios), unilateral"
+  },
+  "o_que_refuta": "Se p >= 0,05 para T_indisp, não há evidência de que a indisponibilidade aumente durante as cheias severas. Se p < 0,05, a concentração é registrada como indício, não como causa: o teste não separa enchente que derruba a estação de falha de transmissão, nem de critério espacial que descarta chuva extrema verdadeira.",
+  "analises_descritivas": [
+    "mapa das estações com a porcentagem de leituras travadas ou oscilando, 1995-2025",
+    "mapa das estações elegíveis com o excesso de indisponibilidade dentro dos episódios severos, em relação ao resto do teste",
+    "mapa de calor ano × mês da porcentagem de estação-dia com leitura travada",
+    "série diária da porcentagem de estações elegíveis indisponíveis no teste, por UF, com os episódios severos sombreados",
+    "tabela por rede e ano"
+  ],
+  "limites_declarados": [
+    "o REInDesC é por município e não tem coordenadas; o episódio vale para a UF inteira, o que dilui o efeito local",
+    "o critério de travado vem de PINELO (2026) e pode marcar chuva constante verdadeira; não foi calibrado",
+    "o motivo físico da falha não está nos dados; as causas possíveis vêm da literatura e da imprensa e não são testadas aqui"
+  ]
+}
