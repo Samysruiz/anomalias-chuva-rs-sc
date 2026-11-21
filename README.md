@@ -36,6 +36,7 @@ Os achados, em ordem:
 | 07 | O carimbo do UNIPLU-BR está mesmo em UTC? | sim: pico de correlação com a NOAA em 0 h, em 117 pares |
 | 08 | O autoencoder detecta as cheias melhor que as referências? | não: hipótese não corroborada (critério 1); o limiar simples lidera a 1% |
 | 09 | (Exploratório) A chuva das vizinhas ajuda o autoencoder? | não (S1 e S2 não ocorrem); o PCA com a vizinhança melhora, mas alarmando o dobro no teste |
+| 10 | (Exploratório) Os pluviômetros travam ou falham nas cheias? | travamento: não nas estações do modelo (p = 0,994), e 99,5% dele é do Cemaden; falta de dado: maior nos episódios, mas confundida com o fim da série Hidroweb em 30/09/2025 (sensibilidade pendente) |
 
 ## A pergunta
 
@@ -71,6 +72,7 @@ Qualquer desses resultados será publicado como resultado.
 - Notebook 03b (verificação de fuso com a NOAA): executado em 19/11/2026; UTC confirmado.
 - Notebook 04 (janelas e modelos): rodada definitiva em 17/11/2026; escores gravados e travados.
 - Notebook 06 (fase 2, exploratória, versão mínima): executado em 21/11/2026; resultado no achado 09.
+- Notebook 07 (falhas dos sensores, exploratório): executado em 21/11/2026; resultado no achado 10; sensibilidades S1 e S2 pendentes.
 - Notebook 05 (avaliação): executado em 20/11/2026, com a emenda do limiar rejeitada e o nível 1 calibrado
   no treino, decisões registradas pelo grupo antes da execução. Auditoria com 0 falhas.
 
