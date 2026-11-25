@@ -74,8 +74,11 @@ Qualquer desses resultados será publicado como resultado.
 - Notebook 06 (fase 2, exploratória, versão mínima): executado em 21/11/2026; resultado no achado 09.
 - Notebook 07 (falhas dos sensores, exploratório): executado em 21/11/2026; resultado no achado 10; sensibilidades S1 e S2 pendentes.
 - Notebook 05 (avaliação): executado em 20/11/2026, com a emenda do limiar rejeitada e o nível 1 calibrado
-  O arquivo executado é `codigo/05_avaliacao_sugestao.ipynb` (gerado por `gerar_nb05.py --sugestao`, com a emenda do limiar marcada como rejeitada, decisão do grupo de 20/11/2026); `codigo/05_avaliacao.ipynb` é a versão em branco, que para até a decisão ser preenchida. No Drive, o executado se chama `05_avaliacao_EXECUTADO_20-11.ipynb`.
   no treino, decisões registradas pelo grupo antes da execução. Auditoria com 0 falhas.
+  O notebook que rodou foi o `codigo/05_avaliacao_sugestao.ipynb` (gerado por `gerar_nb05.py --sugestao`,
+  já com a emenda do limiar marcada como rejeitada); `codigo/05_avaliacao.ipynb` é a versão em branco, que
+  para até a decisão ser preenchida. No Drive, a cópia executada, com as saídas, se chama
+  `05_avaliacao_EXECUTADO_20-11.ipynb`.
 
 ## Resultado
 
